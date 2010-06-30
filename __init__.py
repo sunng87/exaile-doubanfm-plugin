@@ -24,7 +24,8 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from dbradioapi import DoubanRadio
+from libdbfm import DoubanRadio
+import dbfm_pref
 
 import gtk
 
@@ -32,27 +33,30 @@ from xl import common, event, main, playlist, xdg, settings
 from xl.radio import *
 from xl.nls import gettext as _
 from xlgui import guiutil
-from xlgui.widgets import dialogs
 
+drp = None
 
 def enable(exaile):
 	if exaile.loading:
-		exaile.add_callback(_enable, "exaile_loaded")
+		event.add_callback(_enable, "exaile_loaded")
 	else:
 		_enable(None, exaile, None)
 
 def _enable(device, exaile, nothing):
+	global drp
 	username = settings.get_option("plugin/douban_radio/username")	
 	password = settings.get_option("plugin/douban_radio/password")
 	drp = DoubanRadioPlugin(exaile, username, password)
-	pass
 
 
 def disable(exaile):
+	##TODO do some cleaning work
+	global drp
+	drp.destroy()
 	pass
 
-def get_preferences_pane():
-	return doubanfm_settings
+def get_prefs_pane():
+	return dbfm_pref
 
 
 class DoubanRadioPlugin(object):
@@ -63,16 +67,32 @@ class DoubanRadioPlugin(object):
 		self.__create_menu_item__()
 
 	def __create_menu_item__(self):
-		self.menuItem = gtk.MenuItem(_('Douban Radio'))
-		self.menuItem.connect('activate', self.active_douban_radio, exaile)
+		exaile = self.exaile
+		
+		self.menuItem = gtk.MenuItem(_('Open Douban.fm'))
+		menu = gtk.Menu()
+		self.menuItem.set_submenu(menu)
 
-		exaile.gui.builder.get_object('files_menu').insert(self.menuItem, 4)
+		channels = {'Personalized':0, 'Mandarin':1, 'Western':2, 'Cantonese': 6,
+				'70s': 3, '80s': 4, '90s': 5}
+		for channel_name  in channels.keys():
+			menuItem = gtk.MenuItem(_(channel_name))
+			##TODO bind events here
+			
+			menu.prepend(menuItem)
+			menuItem.show()
+
+#		self.menu.connect('activate', self.active_douban_radio, self.exaile)
+
+		exaile.gui.builder.get_object('file_menu').insert(self.menuItem, 5)
 
 		self.menuItem.show()
 
-	def active_douban_radio(exaile):
+	def active_douban_radio(self, exaile):
 		pass
 		
+	def destroy(self):
+		pass
 		
 
 

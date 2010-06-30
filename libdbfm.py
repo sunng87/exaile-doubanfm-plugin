@@ -58,11 +58,12 @@ class DoubanRadio():
 
 		conn.close()
 
-		dbcl2 = re.findall('dbcl2="(.*?)"', resultCookie)[0]
-		self.dbcl2 = dbcl2
+		dbcl2 = re.findall('dbcl2="(.*?)"', resultCookie)
+		if dbcl2 is not None and len(dbcl2) > 0:
+			self.dbcl2 = dbcl2[0]
 		
-		uid = dbcl2.split(':')[0]
-		self.uid = uid
+			uid = self.dbcl2.split(':')[0]
+			self.uid = uid
 
 		bid = re.findall('bid="(.*?)"', resultCookie)[0]
 		self.bid = bid
