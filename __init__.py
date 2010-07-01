@@ -29,12 +29,12 @@ import dbfm_pref
 
 import gtk
 
-from xl import common, event, main, playlist, xdg, settings
+from xl import common, event, main, playlist, xdg, settings, trax
 from xl.radio import *
 from xl.nls import gettext as _
 from xlgui import guiutil
 
-drp = None
+DOUBANFM = None
 
 def enable(exaile):
 	if exaile.loading:
@@ -43,15 +43,15 @@ def enable(exaile):
 		_enable(None, exaile, None)
 
 def _enable(device, exaile, nothing):
-	global drp
+	global DOUBANFM
 	username = settings.get_option("plugin/douban_radio/username")	
 	password = settings.get_option("plugin/douban_radio/password")
-	drp = DoubanRadioPlugin(exaile, username, password)
+	DOUBANFM = DoubanRadioPlugin(exaile, username, password)
 
 
 def disable(exaile):
-	global drp
-	drp.destroy(exaile)
+	global DOUBANFM
+	DOUBANFM.destroy(exaile)
 	pass
 
 def get_prefs_pane():
@@ -59,6 +59,8 @@ def get_prefs_pane():
 
 
 class DoubanRadioPlugin(object):
+	channels = {'Personalized':0, 'Mandarin':1, 'Western':2, 'Cantonese': 6,
+				'70s': 3, '80s': 4, '90s': 5}
 	def __init__(self, exaile, username ,password):
 		
 		self.doubanfm = DoubanRadio(username, password)
@@ -72,11 +74,11 @@ class DoubanRadioPlugin(object):
 		menu = gtk.Menu()
 		self.menuItem.set_submenu(menu)
 
-		channels = {'Personalized':0, 'Mandarin':1, 'Western':2, 'Cantonese': 6,
-				'70s': 3, '80s': 4, '90s': 5}
-		for channel_name  in channels.keys():
+		for channel_name  in self.channels.keys():
 			menuItem = gtk.MenuItem(_(channel_name))
 			##TODO bind events here
+
+			menuItem.connect('activate', self.active_douban_radio, channel_name)
 			
 			menu.prepend(menuItem)
 			menuItem.show()
@@ -86,8 +88,24 @@ class DoubanRadioPlugin(object):
 		exaile.gui.builder.get_object('file_menu').insert(self.menuItem, 5)
 
 		self.menuItem.show()
+	
+	def create_track_from_douban_song(self, song):
+		uri = song['url']
 
-	def active_douban_radio(self, exaile):
+		tracks= trax.get_tracks_from_uri(uri)
+		if tracks is not None and len(tracks) > 0:
+			track = tracks[0]
+			track.set_tag_raw("artist", song['artist'])
+			track.set_tag_raw("album", song['albumtitle'])
+			return track
+
+	def active_douban_radio(self, type, channel_name):
+		channel_id = self.channels[channel_name]	
+
+		self.doubanfm.set_channel(channel_id)
+		songs = self.doubanfm.new_playlist()
+		tracks = map(self.create_track_from_douban_song, songs)
+		print tracks
 		pass
 		
 	def destroy(self, exaile):
