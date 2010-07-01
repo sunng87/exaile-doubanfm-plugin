@@ -59,8 +59,10 @@ def get_prefs_pane():
 
 
 class DoubanRadioPlugin(object):
-	channels = {'Personalized':0, 'Mandarin':1, 'Western':2, 'Cantonese': 6,
-				'70s': 3, '80s': 4, '90s': 5}
+	channels = {_('Personalized'):0, _('Mandarin'):1, _('Western'):2, 
+			_('Cantonese'): 6, _('70s'): 3, _('80s'): 4, _('90s'): 5}
+
+	@common.threaded
 	def __init__(self, exaile, username ,password):
 		
 		self.doubanfm = DoubanRadio(username, password)
@@ -95,18 +97,45 @@ class DoubanRadioPlugin(object):
 		tracks= trax.get_tracks_from_uri(uri)
 		if tracks is not None and len(tracks) > 0:
 			track = tracks[0]
-			track.set_tag_raw("artist", song['artist'])
-			track.set_tag_raw("album", song['albumtitle'])
+			track.set_tag_raw('title', song['title'])
+			track.set_tag_raw('artist', song['artist'])
+			track.set_tag_raw('album', song['albumtitle'])
+			track.set_tag_raw('track', song['sid'])
 			return track
+
+	def create_playlist(self, name, initial_tracks=[]):
+		## to update in 0.3.2 
+		## plist = DoubanFMPlaylist(name, initial_tracks)
+		plist = DoubanFMPlaylist(name)
+		plist.set_ordered_tracks(initial_tracks)
+
+		## set_shuffle_mode('disabled')
+		plist.set_random(False)
+		## set_repeat_mode('disabled')
+		plist.set_repeat(False)
+		## set_dynamic_mode('disabled')
+		plist.set_dynamic(False)
+
+		return plist
 
 	def active_douban_radio(self, type, channel_name):
 		channel_id = self.channels[channel_name]	
 
 		self.doubanfm.set_channel(channel_id)
-		songs = self.doubanfm.new_playlist()
+		try:
+			songs = self.doubanfm.new_playlist()
+		except:
+			gtk.MessageDialog(self.exaile.gui.main.window, 0,
+					gtk.MESSAFE_ERROR, 
+					_('Failed to retrieve playlist, try again.'))
+			return
+
 		tracks = map(self.create_track_from_douban_song, songs)
-		print tracks
-		pass
+		plist = self.create_playlist(
+				_('DoubanFM')+" "+channel_name, tracks)
+		
+		self.exaile.gui.main.add_playlist(plist)
+		self.exaile.player.play(plist.get_ordered_tracks()[0])
 		
 	def destroy(self, exaile):
 		## TODO remove all opened tab
@@ -115,4 +144,8 @@ class DoubanRadioPlugin(object):
 		
 
 
+class DoubanFMPlaylist(playlist.Playlist):
+	def __init__(self, name):
+		playlist.Playlist.__init__(self, name)
+		pass
 
