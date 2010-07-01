@@ -69,6 +69,37 @@ class DoubanRadioPlugin(object):
 		self.exaile = exaile
 		self.__create_menu_item__()
 
+		self.__register_events()
+
+	def __register_events(self):
+		event.add_callback(self.check_to_load_more, 'playback_player_start')
+		event.add_callback(self.close_playlist, 'quit_application')
+
+	def __unregister_events(self):
+		event.remove_callback(self.check_to_load_more, 'playback_player_start')
+		event.remove_callback(self.close_playlist, 'quit_application')
+
+	def close_playlist(self, type, exaile, data=None):
+		removed = 0
+		for i,page in enumerate(exaile.gui.main.playlist_notebook):
+			if isinstance(page.playlist, DoubanFMPlaylist):
+				exaile.gui.main.close_playlist_tab(i-removed)
+				removed += 1
+
+	def check_to_load_more(self, type, player, track):
+		playlist = self.exaile.gui.main.get_current_playlist().playlist
+		if isinstance(playlist, DoubanFMPlaylist):
+			## check if last one
+			if playlist.index(track) == len(playlist.get_ordered_tracks())-1:
+				self.load_more(playlist)
+
+	def load_more(self, playlist):
+		current_tracks = playlist.get_ordered_tracks()
+		sids = map(lambda t: t.get_tag_raw('sid'), current_tracks)
+		songs = self.doubanfm.played_list(sids)
+		tracks = map(self.create_track_from_douban_song, songs)
+		playlist.add_tracks(tracks)	
+
 	def __create_menu_item__(self):
 		exaile = self.exaile
 		
@@ -78,7 +109,6 @@ class DoubanRadioPlugin(object):
 
 		for channel_name  in self.channels.keys():
 			menuItem = gtk.MenuItem(_(channel_name))
-			##TODO bind events here
 
 			menuItem.connect('activate', self.active_douban_radio, channel_name)
 			
@@ -100,7 +130,9 @@ class DoubanRadioPlugin(object):
 			track.set_tag_raw('title', song['title'])
 			track.set_tag_raw('artist', song['artist'])
 			track.set_tag_raw('album', song['albumtitle'])
-			track.set_tag_raw('track', song['sid'])
+			track.set_tag_raw('sid', song['sid'])
+			track.set_tag_raw('aid', song['aid'])
+			track.set_tag_raw('origin', 'doubanfm')
 			return track
 
 	def create_playlist(self, name, initial_tracks=[]):
@@ -125,9 +157,11 @@ class DoubanRadioPlugin(object):
 		try:
 			songs = self.doubanfm.new_playlist()
 		except:
-			gtk.MessageDialog(self.exaile.gui.main.window, 0,
-					gtk.MESSAFE_ERROR, 
+			dialog = gtk.MessageDialog(self.exaile.gui.main.window, 0,
+					gtk.MESSAGE_ERROR, gtk.BUTTONS_OK,
 					_('Failed to retrieve playlist, try again.'))
+			dialog.run()
+			dialog.destroy()
 			return
 
 		tracks = map(self.create_track_from_douban_song, songs)
@@ -138,8 +172,8 @@ class DoubanRadioPlugin(object):
 		self.exaile.player.play(plist.get_ordered_tracks()[0])
 		
 	def destroy(self, exaile):
-		## TODO remove all opened tab
 		exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
+		self.__unregister_events()
 		pass
 		
 
@@ -148,4 +182,5 @@ class DoubanFMPlaylist(playlist.Playlist):
 	def __init__(self, name):
 		playlist.Playlist.__init__(self, name)
 		pass
+
 

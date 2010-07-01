@@ -138,7 +138,7 @@ class DoubanRadio():
 
 	def skip_song(self, sid, aid, history=[]):
 		params = self.__get_default_params__('s')
-		params['h'] = self.__format_history__(history)
+		params['h'] = self.__format_list__(history)
 		params['sid'] = sid
 		params['aid'] = aid
 	
@@ -154,7 +154,7 @@ class DoubanRadio():
 
 	def played_list(self, history=[]):
 		params = self.__get_default_params__('p')
-		params['h'] = self.__format_history__(history)
+		params['h'] = self.__format_list__(history)
 		
 		results = self.__remote_fm__(params)
 		return json.loads(results)['song']
