@@ -50,9 +50,8 @@ def _enable(device, exaile, nothing):
 
 
 def disable(exaile):
-	##TODO do some cleaning work
 	global drp
-	drp.destroy()
+	drp.destroy(exaile)
 	pass
 
 def get_prefs_pane():
@@ -91,7 +90,9 @@ class DoubanRadioPlugin(object):
 	def active_douban_radio(self, exaile):
 		pass
 		
-	def destroy(self):
+	def destroy(self, exaile):
+		## TODO remove all opened tab
+		exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
 		pass
 		
 
