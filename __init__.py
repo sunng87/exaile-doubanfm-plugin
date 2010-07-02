@@ -74,10 +74,107 @@ class DoubanRadioPlugin(object):
 	def __register_events(self):
 		event.add_callback(self.check_to_load_more, 'playback_player_start')
 		event.add_callback(self.close_playlist, 'quit_application')
+		event.add_callback(self.play_feedback, 'playlist_current_changed')
+		event.add_callback(self.user_feedback, 'doubanfm_track_rating_change')
 
 	def __unregister_events(self):
 		event.remove_callback(self.check_to_load_more, 'playback_player_start')
 		event.remove_callback(self.close_playlist, 'quit_application')
+		event.remove_callback(self.play_feedback, 'playlist_current_changed')
+		event.remove_callback(self.user_feedback, 'doubanfm_track_rating_change')
+
+	def user_feedback(self, type, track, rating_pair) :
+		prev_rating, rating = rating_pair
+		if rating == 1:
+			## mark to recycle
+			self.mark_as_recycle(track)
+		if rating == 2 and prev_rating != 2:
+			self.mark_as_skip(track)
+		if prev_rating == 5 and rating < 5:
+			## mark to dislike
+			self.mark_as_dislike(track)
+		if rating == 5 and prev_rating < 5:
+			## mark to like
+			self.mark_as_like(track)
+
+	@common.threaded
+	def mark_as_skip(self, track):
+		playlist = self.get_current_playlist()
+
+		rest_sids = self.get_rest_sids(playlist)
+
+		## play next song
+		self.exaile.gui.main.queue.next()
+
+		sid = track.sid
+		aid = track.aid
+		songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
+		tracks = map(self.create_track_from_douban_song, songs)
+
+		playlist.add_tracks(tracks)
+
+
+	@common.threaded
+	def mark_as_like(self, track):
+		sid = track.sid
+		aid = track.aid
+		self.doubanfm.fav_song(sid, aid)
+
+	@common.threaded
+	def mark_as_dislike(self, track):
+		sid = track.sid
+		aid = track.aid
+
+		self.doubanfm.unfav_song(sid, aid)
+
+	@common.threaded
+	def mark_as_recycle(self, track):
+		playlist = self.get_current_playlist()
+
+		rest_sids = self.get_rest_sids(playlist)
+
+		## play next song
+		self.exaile.gui.main.queue.next()
+
+		## remove the track
+		self.remove_current_track()
+
+		sid = track.sid
+		aid = track.aid
+		songs = self.doubanfm.del_song(sid, aid, rest=rest_sids)
+		tracks = map(self.create_track_from_douban_song, songs)
+
+		playlist.add_tracks(tracks)
+
+	def get_rest_sids(self, playlist):
+		playlist = self.get_current_playlist()
+
+		current_tracks = playlist.get_tracks()
+		rest_tracks = current_tracks[playlist.get_current_pos()+1:]
+		rest_sids = self.tracks_to_sids(rest_tracks)
+		return rest_sids
+
+	def get_selected_track(self):
+		self.exaile.gui.main.get_current_playlist().get_selected_track()
+
+	def remove_current_track(self):
+		self.exaile.gui.main.get_current_playlist().remove_selected_tracks()
+
+	def tracks_to_sids(self, tracks):
+		return map(lambda t: t.sid, tracks)
+
+	@common.threaded
+	def play_feedback(self, type, playlist, current_track):
+		if isinstance(playlist, DoubanFMPlaylist) and isinstance(self.last_track, DoubanFMTrack):
+			track = self.last_track
+			sid = track.sid
+			aid = track.aid
+			if sid is not None and aid is not None:
+				self.doubanfm.played_song(sid, aid)
+			self.last_track = current_track
+
+	def get_current_playlist(self):
+		return self.exaile.gui.main.get_current_playlist().playlist
 
 	def close_playlist(self, type, exaile, data=None):
 		removed = 0
@@ -87,18 +184,22 @@ class DoubanRadioPlugin(object):
 				removed += 1
 
 	def check_to_load_more(self, type, player, track):
-		playlist = self.exaile.gui.main.get_current_playlist().playlist
+		playlist = self.get_current_playlist()
 		if isinstance(playlist, DoubanFMPlaylist):
 			## check if last one
-			if playlist.index(track) == len(playlist.get_ordered_tracks())-1:
+			if playlist.index(track) == len(playlist.get_tracks())-1:
 				self.load_more(playlist)
 
-	def load_more(self, playlist):
+	def get_history_sids(self, playlist):
 		current_tracks = playlist.get_ordered_tracks()
-		sids = map(lambda t: t.get_tag_raw('sid'), current_tracks)
+		sids = self.tracks_to_sids(current_tracks)
+		return sids
+
+	def load_more(self, playlist):
+		sids = self.get_history_sids(playlist)
 		songs = self.doubanfm.played_list(sids)
 		tracks = map(self.create_track_from_douban_song, songs)
-		playlist.add_tracks(tracks)	
+		playlist.add_tracks(tracks)
 
 	def __create_menu_item__(self):
 		exaile = self.exaile
@@ -124,16 +225,13 @@ class DoubanRadioPlugin(object):
 	def create_track_from_douban_song(self, song):
 		uri = song['url']
 
-		tracks= trax.get_tracks_from_uri(uri)
-		if tracks is not None and len(tracks) > 0:
-			track = tracks[0]
-			track.set_tag_raw('title', song['title'])
-			track.set_tag_raw('artist', song['artist'])
-			track.set_tag_raw('album', song['albumtitle'])
-			track.set_tag_raw('sid', song['sid'])
-			track.set_tag_raw('aid', song['aid'])
-			track.set_tag_raw('origin', 'doubanfm')
-			return track
+		track = DoubanFMTrack(uri, song['sid'], song['aid'], song['like'])
+		track.set_tag_raw('title', song['title'])
+		track.set_tag_raw('artist', song['artist'])
+		track.set_tag_raw('album', song['albumtitle'])
+		track.set_tag_raw('cover_url', song['picture'])
+
+		return track
 
 	def create_playlist(self, name, initial_tracks=[]):
 		## to update in 0.3.2 
@@ -169,18 +267,37 @@ class DoubanRadioPlugin(object):
 				_('DoubanFM')+" "+channel_name, tracks)
 		
 		self.exaile.gui.main.add_playlist(plist)
-		self.exaile.player.play(plist.get_ordered_tracks()[0])
+#		self.exaile.player.play(plist.get_ordered_tracks()[0])
+
+		self.last_track = plist.get_ordered_tracks()[0]
 		
 	def destroy(self, exaile):
 		exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
 		self.__unregister_events()
 		pass
 		
-
-
 class DoubanFMPlaylist(playlist.Playlist):
 	def __init__(self, name):
 		playlist.Playlist.__init__(self, name)
 		pass
 
+class DoubanFMTrack(trax.Track):
+	def __init__(self, uri, sid, aid, fav):
+		trax.Track.__init__(self, uri)
+		self.sid = sid
+		self.aid = aid
 
+		if fav == 1:
+			trax.Track.set_rating(self, 5)
+		else:
+			trax.Track.set_rating(self, 3)
+
+	def set_rating(self, rating):
+		prev_rating = trax.Track.get_rating(self)
+		trax.Track.set_rating(self, rating)
+		
+		event.log_event('doubanfm_track_rating_change', 
+				self, (prev_rating, rating))
+
+	
+		
