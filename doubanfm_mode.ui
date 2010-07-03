@@ -3,6 +3,10 @@
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="window1">
+    <property name="width_request">400</property>
+    <property name="height_request">130</property>
+    <property name="title" translatable="yes">Exaile Doubanfm</property>
+    <property name="icon">exaile.png</property>
     <child>
       <object class="GtkHBox" id="hbox1">
         <property name="visible">True</property>
@@ -19,12 +23,16 @@
                 <property name="height_request">100</property>
                 <property name="visible">True</property>
                 <child>
-                  <placeholder/>
+                  <object class="GtkImage" id="image6">
+                    <property name="visible">True</property>
+                    <property name="pixbuf">c7fbd3e04b854f4fced19ca4bbb239d6.jpg</property>
+                  </object>
                 </child>
               </object>
             </child>
           </object>
           <packing>
+            <property name="expand">False</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -40,7 +48,8 @@
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <property name="xpad">4</property>
-                    <property name="label" translatable="yes">Artist</property>
+                    <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;Something - George Harrison&lt;/b&gt;&lt;/big&gt;</property>
+                    <property name="use_markup">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -54,7 +63,7 @@
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <property name="xpad">4</property>
-                    <property name="label" translatable="yes">track info</property>
+                    <property name="label" translatable="yes">The Best of George Harrison</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -66,33 +75,35 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="padding">5</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkProgressBar" id="playback_progressbar">
                 <property name="visible">True</property>
+                <property name="show_text">True</property>
                 <property name="text">0:00 / 0:00</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="padding">5</property>
                 <property name="position">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkHButtonBox" id="hbuttonbox1">
+              <object class="GtkHBox" id="hbox2">
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkButton" id="button1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="focus_on_click">False</property>
                     <child>
                       <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-ok</property>
+                        <property name="icon_name">bookmark-new</property>
                       </object>
                     </child>
                   </object>
@@ -109,7 +120,7 @@
                     <child>
                       <object class="GtkImage" id="image2">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-media-next</property>
+                        <property name="icon_name">media-skip-forward</property>
                       </object>
                     </child>
                   </object>
@@ -126,7 +137,7 @@
                     <child>
                       <object class="GtkImage" id="image3">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-delete</property>
+                        <property name="icon_name">edit-delete</property>
                       </object>
                     </child>
                   </object>
@@ -143,7 +154,7 @@
                     <child>
                       <object class="GtkImage" id="image4">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-cancel</property>
+                        <property name="icon_name">go-home</property>
                       </object>
                     </child>
                   </object>
@@ -157,7 +168,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="yalign">0.05000000074505806</property>
                     <child>
                       <object class="GtkImage" id="image5">
                         <property name="visible">True</property>
@@ -167,7 +177,6 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">False</property>
                     <property name="position">4</property>
                   </packing>
                 </child>
@@ -175,18 +184,16 @@
                   <object class="GtkHScale" id="hscale1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="adjustment">volume-slider-adjustment</property>
                     <property name="draw_value">False</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
                     <property name="position">5</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">5</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -197,5 +204,10 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAdjustment" id="volume-slider-adjustment">
+    <property name="upper">1</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">0.20000000000000001</property>
   </object>
 </interface>
