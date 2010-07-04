@@ -2,11 +2,10 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkWindow" id="window1">
+  <object class="GtkWindow" id="doubanfm_mode_window">
     <property name="width_request">400</property>
     <property name="height_request">130</property>
     <property name="title" translatable="yes">Exaile Doubanfm</property>
-    <property name="icon">exaile.png</property>
     <child>
       <object class="GtkHBox" id="hbox1">
         <property name="visible">True</property>
@@ -23,10 +22,7 @@
                 <property name="height_request">100</property>
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkImage" id="image6">
-                    <property name="visible">True</property>
-                    <property name="pixbuf">c7fbd3e04b854f4fced19ca4bbb239d6.jpg</property>
-                  </object>
+                  <placeholder/>
                 </child>
               </object>
             </child>
@@ -48,7 +44,7 @@
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <property name="xpad">4</property>
-                    <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;Something - George Harrison&lt;/b&gt;&lt;/big&gt;</property>
+                    <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;Trackname - artist name&lt;/b&gt;&lt;/big&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -63,7 +59,7 @@
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <property name="xpad">4</property>
-                    <property name="label" translatable="yes">The Best of George Harrison</property>
+                    <property name="label" translatable="yes">album name</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -95,11 +91,15 @@
             <child>
               <object class="GtkHBox" id="hbox2">
                 <property name="visible">True</property>
+                <property name="spacing">4</property>
                 <child>
-                  <object class="GtkButton" id="button1">
+                  <object class="GtkButton" id="bookmark_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Fav / Unfav</property>
+                    <property name="focus_on_click">False</property>
+                    <signal name="clicked" handler="on_bookmark_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
@@ -113,10 +113,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button2">
+                  <object class="GtkButton" id="skip_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Skip</property>
+                    <property name="focus_on_click">False</property>
+                    <signal name="clicked" handler="on_skip_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image2">
                         <property name="visible">True</property>
@@ -130,10 +133,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button3">
+                  <object class="GtkButton" id="delete_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Delete</property>
+                    <property name="focus_on_click">False</property>
+                    <signal name="clicked" handler="on_delete_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image3">
                         <property name="visible">True</property>
@@ -147,10 +153,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button4">
+                  <object class="GtkButton" id="go_home_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Switch to nornal mode</property>
+                    <property name="focus_on_click">False</property>
+                    <signal name="clicked" handler="on_go_home_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image4">
                         <property name="visible">True</property>
@@ -164,10 +173,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="togglebutton1">
+                  <object class="GtkToggleButton" id="volume_mute_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="focus_on_click">False</property>
                     <child>
                       <object class="GtkImage" id="image5">
                         <property name="visible">True</property>
@@ -181,11 +191,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHScale" id="hscale1">
+                  <object class="GtkHScale" id="volume_scale">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="adjustment">volume-slider-adjustment</property>
                     <property name="draw_value">False</property>
+                    <signal name="value_changed" handler="on_volume_slider_value_changed"/>
                   </object>
                   <packing>
                     <property name="position">5</property>

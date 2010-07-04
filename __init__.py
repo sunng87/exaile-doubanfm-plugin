@@ -25,6 +25,7 @@
 # from your version.
 
 from libdbfm import DoubanRadio
+from doubanfm_mode import DoubanfmMode
 import dbfm_pref
 
 import gtk
@@ -70,6 +71,8 @@ class DoubanRadioPlugin(object):
 		self.__create_menu_item__()
 
 		self.__register_events()
+		self.doubanfm_mode = DoubanfmMode(self.exaile, self)
+
 
 	def __register_events(self):
 		event.add_callback(self.check_to_load_more, 'playback_player_start')
@@ -112,13 +115,14 @@ class DoubanRadioPlugin(object):
 		tracks = map(self.create_track_from_douban_song, songs)
 
 		playlist.add_tracks(tracks)
-
+		track.set_rating2(2)
 
 	@common.threaded
 	def mark_as_like(self, track):
 		sid = track.sid
 		aid = track.aid
 		self.doubanfm.fav_song(sid, aid)
+		track.set_rating2(5)
 
 	@common.threaded
 	def mark_as_dislike(self, track):
@@ -126,6 +130,7 @@ class DoubanRadioPlugin(object):
 		aid = track.aid
 
 		self.doubanfm.unfav_song(sid, aid)
+		track.set_rating2(3)
 
 	@common.threaded
 	def mark_as_recycle(self, track):
@@ -145,6 +150,7 @@ class DoubanRadioPlugin(object):
 		tracks = map(self.create_track_from_douban_song, songs)
 
 		playlist.add_tracks(tracks)
+		track.set_rating2(1)
 
 	def get_rest_sids(self, playlist):
 		playlist = self.get_current_playlist()
@@ -156,6 +162,10 @@ class DoubanRadioPlugin(object):
 
 	def get_selected_track(self):
 		self.exaile.gui.main.get_current_playlist().get_selected_track()
+
+	def get_current_track(self):
+		pl = self.exaile.gui.main.get_current_playlist().playlist
+		return pl.get_tracks()[pl.get_current_pos()]
 
 	def remove_current_track(self):
 		self.exaile.gui.main.get_current_playlist().remove_selected_tracks()
@@ -174,7 +184,7 @@ class DoubanRadioPlugin(object):
 			self.last_track = current_track
 
 	def get_current_playlist(self):
-		return self.exaile.gui.main.get_current_playlist().playlist
+		return self.exaile.gui.main.get_selected_playlist().playlist
 
 	def close_playlist(self, type, exaile, data=None):
 		removed = 0
@@ -221,6 +231,11 @@ class DoubanRadioPlugin(object):
 		exaile.gui.builder.get_object('file_menu').insert(self.menuItem, 5)
 
 		self.menuItem.show()
+
+		self.modeMenuItem = gtk.MenuItem(_('DoubanFM mode'))
+		self.modeMenuItem.connect('activate', self.show_mode)
+		exaile.gui.builder.get_object('view_menu').append(self.modeMenuItem)
+		self.modeMenuItem.show()
 	
 	def create_track_from_douban_song(self, song):
 		uri = song['url']
@@ -232,6 +247,9 @@ class DoubanRadioPlugin(object):
 		track.set_tag_raw('cover_url', song['picture'])
 
 		return track
+
+	def show_mode(self, *e):
+		self.doubanfm_mode.show()
 
 	def create_playlist(self, name, initial_tracks=[]):
 		## to update in 0.3.2 
@@ -267,13 +285,24 @@ class DoubanRadioPlugin(object):
 				_('DoubanFM')+" "+channel_name, tracks)
 		
 		self.exaile.gui.main.add_playlist(plist)
-#		self.exaile.player.play(plist.get_ordered_tracks()[0])
+#		self.play(plist)
 
 		self.last_track = plist.get_ordered_tracks()[0]
+
+#		self.doubanfm_mode.show()
+
+	def play(self, pl):
+		self.exaile.gui.main.queue.set_current_playlist(pl)
+		self.exaile.gui.main.queue.play()
 		
 	def destroy(self, exaile):
-		exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
+		if self.menuItem :
+			exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
+		if self.modeMenuItem:
+			exaile.gui.builder.get_object('view_menu').remove(self.modeMenuItem)
 		self.__unregister_events()
+
+		self.doubanfm_mode.destroy()
 		pass
 		
 class DoubanFMPlaylist(playlist.Playlist):
@@ -299,5 +328,7 @@ class DoubanFMTrack(trax.Track):
 		event.log_event('doubanfm_track_rating_change', 
 				self, (prev_rating, rating))
 
+	def set_rating2(self, rating):
+		trax.Track.set_rating(self, rating)
 	
 		
