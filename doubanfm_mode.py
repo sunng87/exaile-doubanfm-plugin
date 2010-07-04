@@ -29,7 +29,7 @@ import gtk.glade
 import os
 
 from xl import xdg, event, settings
-from xlgui import cover, guiutil
+from xlgui import cover, guiutil, tray
 from xlgui.main import PlaybackProgressBar
 
 def get_resource_path(filename):
@@ -78,25 +78,43 @@ class DoubanfmMode():
 			progress_box, self.exaile.player
 		)
 
+		self.visible = False
 		self.active = False
 
 		event.add_callback(self.on_playback_start, 'playback_track_start', self.exaile.player)
+		self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
+
+	def toggle_visible(self, *e):
+		if not self.active:
+			return False
+
+		if self.visible:
+			self.window.hide()
+		else:
+			self.window.show_all()
+		self.visible = not self.visible
+		return True
 
 	def show(self, *e):
-		if not self.active:
+		if not self.visible:
 			self.exaile.gui.main.window.hide()
 
 			self.window.show_all()
+			self.visible = True
 			self.active = True
 
 	def hide(self, *e):
-		if self.active:
+		if self.visible:
 			self.window.hide()
 			self.exaile.gui.main.window.show()
+			self.visible = False
 			self.active = False
 
 	def on_bookmark_button_clicked(self, *e):
 		track = self.dbfm_plugin.get_current_track()
+		if not self.dbfm_plugin.is_douban_track(track):
+			return
+
 		if track.get_rating() == 5:
 			self.dbfm_plugin.mark_as_dislike(track)
 			self.bookmark_button.set_image(
@@ -108,10 +126,14 @@ class DoubanfmMode():
 
 	def on_skip_button_clicked(self, *e):
 		track = self.dbfm_plugin.get_current_track()
+		if not self.dbfm_plugin.is_douban_track(track):
+			return
 		self.dbfm_plugin.mark_as_skip(track)
 
 	def on_delete_button_clicked(self, *e):
 		track = self.dbfm_plugin.get_current_track()
+		if not self.dbfm_plugin.is_douban_track(track):
+			return
 		self.dbfm_plugin.mark_as_recycle(track)
 
 	def on_go_home_button_clicked(self, *e):
@@ -130,7 +152,7 @@ class DoubanfmMode():
 		album = track.get_tag_raw('album')[0]
 		title = track.get_tag_raw('title')[0]
 
-		self.window.set_title("%s - %s" % (title, artist))
+		self.window.set_title("%s - %s Exaile" % (title, artist))
 		self.track_title_label.set_label("<big><b>%s - %s</b></big>" %(title, artist))
 		self.track_info_label.set_label(album)
 		
@@ -142,5 +164,7 @@ class DoubanfmMode():
 					gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
 
 	def destroy(self):
+		self.window.destroy()
 		event.remove_callback(self.on_playback_start, 'playback_track_start')
+		self.exaile.gui.main.disconnect(self._toggle_id)
 

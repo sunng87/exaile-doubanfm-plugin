@@ -142,7 +142,7 @@ class DoubanRadio():
 		params['sid'] = sid
 		params['aid'] = aid
 	
-		result = self._remote_fm__(params)
+		result = self.__remote_fm__(params)
 		return json.loads(result)['song']
 
 	def played_song(self, sid, aid):

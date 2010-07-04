@@ -100,6 +100,9 @@ class DoubanRadioPlugin(object):
 			## mark to like
 			self.mark_as_like(track)
 
+	def is_douban_track(self, track):
+		return isinstance(track, DoubanFMTrack)
+
 	@common.threaded
 	def mark_as_skip(self, track):
 		playlist = self.get_current_playlist()
@@ -112,9 +115,10 @@ class DoubanRadioPlugin(object):
 		sid = track.sid
 		aid = track.aid
 		songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
-		tracks = map(self.create_track_from_douban_song, songs)
+		if self.get_tracks_remain() < 15:
+			tracks = map(self.create_track_from_douban_song, songs)
 
-		playlist.add_tracks(tracks)
+			playlist.add_tracks(tracks)
 		track.set_rating2(2)
 
 	@common.threaded
@@ -147,9 +151,10 @@ class DoubanRadioPlugin(object):
 		sid = track.sid
 		aid = track.aid
 		songs = self.doubanfm.del_song(sid, aid, rest=rest_sids)
-		tracks = map(self.create_track_from_douban_song, songs)
+		if self.get_tracks_remain() < 15:
+			tracks = map(self.create_track_from_douban_song, songs)
 
-		playlist.add_tracks(tracks)
+			playlist.add_tracks(tracks)
 		track.set_rating2(1)
 
 	def get_rest_sids(self, playlist):
@@ -159,6 +164,12 @@ class DoubanRadioPlugin(object):
 		rest_tracks = current_tracks[playlist.get_current_pos()+1:]
 		rest_sids = self.tracks_to_sids(rest_tracks)
 		return rest_sids
+
+	def get_tracks_remain(self):
+		pl = self.exaile.gui.main.get_current_playlist().playlist
+		total = len(pl.get_tracks())
+		cursor = pl.get_current_pos()
+		return total-cursor
 
 	def get_selected_track(self):
 		self.exaile.gui.main.get_current_playlist().get_selected_track()
@@ -207,9 +218,20 @@ class DoubanRadioPlugin(object):
 
 	def load_more(self, playlist):
 		sids = self.get_history_sids(playlist)
-		songs = self.doubanfm.played_list(sids)
-		tracks = map(self.create_track_from_douban_song, songs)
-		playlist.add_tracks(tracks)
+		retry = 0
+		while retry < 3:
+			try:
+				songs = self.doubanfm.played_list(sids)
+			except:
+				retry += 1
+				continue
+			
+			if len(songs) > 0:
+				tracks = map(self.create_track_from_douban_song, songs)
+				playlist.add_tracks(tracks)
+				break
+			else:
+				retry += 1
 
 	def __create_menu_item__(self):
 		exaile = self.exaile
@@ -291,10 +313,6 @@ class DoubanRadioPlugin(object):
 
 #		self.doubanfm_mode.show()
 
-	def play(self, pl):
-		self.exaile.gui.main.queue.set_current_playlist(pl)
-		self.exaile.gui.main.queue.play()
-		
 	def destroy(self, exaile):
 		if self.menuItem :
 			exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
@@ -316,7 +334,7 @@ class DoubanFMTrack(trax.Track):
 		self.sid = sid
 		self.aid = aid
 
-		if fav == 1:
+		if fav == "1":
 			trax.Track.set_rating(self, 5)
 		else:
 			trax.Track.set_rating(self, 3)
