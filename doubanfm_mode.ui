@@ -95,7 +95,7 @@
                 <child>
                   <object class="GtkButton" id="bookmark_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Fav / Unfav</property>
                     <property name="focus_on_click">False</property>
@@ -115,7 +115,7 @@
                 <child>
                   <object class="GtkButton" id="skip_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Skip</property>
                     <property name="focus_on_click">False</property>
@@ -135,7 +135,7 @@
                 <child>
                   <object class="GtkButton" id="delete_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Delete</property>
                     <property name="focus_on_click">False</property>
@@ -155,10 +155,11 @@
                 <child>
                   <object class="GtkButton" id="go_home_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Switch to nornal mode</property>
                     <property name="focus_on_click">False</property>
+                    <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
                     <signal name="clicked" handler="on_go_home_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image4">
@@ -175,7 +176,7 @@
                 <child>
                   <object class="GtkToggleButton" id="volume_mute_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="focus_on_click">False</property>
                     <child>
