@@ -34,12 +34,12 @@ basedir = os.path.dirname(os.path.realpath(__file__))
 ui = os.path.join(basedir, 'dbfm_pref.ui')
 
 class UsernamePreference(widgets.PrefsItem):
-	default = ''
-	name = 'plugin/douban_radio/username'
+    default = ''
+    name = 'plugin/douban_radio/username'
 
 class PasswordPreference(widgets.PrefsItem):
-	default = ''
-	name = 'plugin/douban_radio/password'
+    default = ''
+    name = 'plugin/douban_radio/password'
 
 
 
