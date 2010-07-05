@@ -255,6 +255,10 @@ class DoubanRadioPlugin(object):
 		self.menuItem.show()
 
 		self.modeMenuItem = gtk.MenuItem(_('DoubanFM mode'))
+		key, modifier = gtk.accelerator_parse('<Control><Alt>D')
+		self.accels = gtk.AccelGroup()
+		self.modeMenuItem.add_accelerator('activate', self.accels, key, modifier, gtk.ACCEL_VISIBLE)
+		self.exaile.gui.main.window.add_accel_group(self.accels)
 		self.modeMenuItem.connect('activate', self.show_mode)
 		exaile.gui.builder.get_object('view_menu').append(self.modeMenuItem)
 		self.modeMenuItem.show()
@@ -318,6 +322,7 @@ class DoubanRadioPlugin(object):
 			exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
 		if self.modeMenuItem:
 			exaile.gui.builder.get_object('view_menu').remove(self.modeMenuItem)
+			exaile.gui.main.remove_accel_group(self.accels)
 		self.__unregister_events()
 
 		self.doubanfm_mode.destroy()
