@@ -78,15 +78,15 @@ class DoubanRadioPlugin(object):
 
 
     def __register_events(self):
-        event.add_callback(self.check_to_load_more, 'playback_player_start')
+        event.add_callback(self.check_to_load_more, 'playback_track_start')
         event.add_callback(self.close_playlist, 'quit_application')
-        event.add_callback(self.play_feedback, 'playlist_current_changed')
+        event.add_callback(self.play_feedback, 'playback_track_end')
         event.add_callback(self.user_feedback, 'doubanfm_track_rating_change')
 
     def __unregister_events(self):
-        event.remove_callback(self.check_to_load_more, 'playback_player_start')
+        event.remove_callback(self.check_to_load_more, 'playback_track_start')
         event.remove_callback(self.close_playlist, 'quit_application')
-        event.remove_callback(self.play_feedback, 'playlist_current_changed')
+        event.remove_callback(self.play_feedback, 'playback_track_end')
         event.remove_callback(self.user_feedback, 'doubanfm_track_rating_change')
 
     def user_feedback(self, type, track, rating_pair) :
@@ -187,18 +187,19 @@ class DoubanRadioPlugin(object):
         return map(lambda t: t.sid, tracks)
 
     @common.threaded
-    def play_feedback(self, type, playlist, current_track):
-        if isinstance(playlist, DoubanFMPlaylist) and isinstance(self.last_track, DoubanFMTrack):
+    def play_feedback(self, type, player, current_track):
+        if isinstance(self.last_track, DoubanFMTrack):
             if self.skipped:
                 self.skipped = False
-                self.last_track = current_track
+                #self.last_track = current_track
                 return
-            track = self.last_track
+            track = current_track
             sid = track.sid
             aid = track.aid
             if sid is not None and aid is not None:
+                print 'xxxxxxx'
                 self.doubanfm.played_song(sid, aid)
-            self.last_track = current_track
+#            self.last_track = current_track
 
     def get_current_playlist(self):
         return self.exaile.gui.main.get_selected_playlist().playlist
