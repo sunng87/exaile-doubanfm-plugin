@@ -197,7 +197,6 @@ class DoubanRadioPlugin(object):
             sid = track.sid
             aid = track.aid
             if sid is not None and aid is not None:
-                print 'xxxxxxx'
                 self.doubanfm.played_song(sid, aid)
 #            self.last_track = current_track
 
