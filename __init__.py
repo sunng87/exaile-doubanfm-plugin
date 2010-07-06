@@ -73,6 +73,9 @@ class DoubanRadioPlugin(object):
         self.__register_events()
         self.doubanfm_mode = DoubanfmMode(self.exaile, self)
 
+        ## mark if a track is skipped instead of end normally
+        self.skipped = False
+
 
     def __register_events(self):
         event.add_callback(self.check_to_load_more, 'playback_player_start')
@@ -105,6 +108,7 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def mark_as_skip(self, track):
+        self.skipped = True
         playlist = self.get_current_playlist()
 
         rest_sids = self.get_rest_sids(playlist)
@@ -138,6 +142,7 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def mark_as_recycle(self, track):
+        self.skipped = True
         playlist = self.get_current_playlist()
 
         rest_sids = self.get_rest_sids(playlist)
@@ -171,9 +176,6 @@ class DoubanRadioPlugin(object):
         cursor = pl.get_current_pos()
         return total-cursor
 
-    def get_selected_track(self):
-        self.exaile.gui.main.get_current_playlist().get_selected_track()
-
     def get_current_track(self):
         pl = self.exaile.gui.main.get_current_playlist().playlist
         return pl.get_tracks()[pl.get_current_pos()]
@@ -187,6 +189,10 @@ class DoubanRadioPlugin(object):
     @common.threaded
     def play_feedback(self, type, playlist, current_track):
         if isinstance(playlist, DoubanFMPlaylist) and isinstance(self.last_track, DoubanFMTrack):
+            if self.skipped:
+                self.skipped = False
+                self.last_track = current_track
+                return
             track = self.last_track
             sid = track.sid
             aid = track.aid
