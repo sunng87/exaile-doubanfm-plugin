@@ -30,8 +30,9 @@ import httplib
 import json
 import re
 import random
+import contextlib
 
-class DoubanRadio():
+class DoubanFM():
     def __init__ (self, username, password):
         self.uid = None
         self.dbcl2 = None
@@ -44,29 +45,25 @@ class DoubanRadio():
         self.channel = channel
 
     def __login__(self, username, password):
-#       bid = self.__get_bid_cookie__()
-        conn = httplib.HTTPConnection ("www.douban.com")
         data = urllib.urlencode({
                 'form_email':username, 'form_password':password})
-#       cookie = 'bid=%s; ue="%s"; as="http://www.douban.com/";' % (bid, username)
         contentType = "application/x-www-form-urlencoded"
         headers = {"Content-Type":contentType}
-        conn.request("POST", "/accounts/login", data, headers)
+        with contextlib.closing(httplib.HTTPConnection("www.douban.com")) as conn:
+            conn.request("POST", "/accounts/login", data, headers)
         
-        r1 = conn.getresponse()
-        resultCookie = r1.getheader('Set-Cookie')
+            r1 = conn.getresponse()
+            resultCookie = r1.getheader('Set-Cookie')
 
-        conn.close()
-
-        dbcl2 = re.findall('dbcl2="(.*?)"', resultCookie)
-        if dbcl2 is not None and len(dbcl2) > 0:
-            self.dbcl2 = dbcl2[0]
+            dbcl2 = re.findall('dbcl2="(.*?)"', resultCookie)
+            if dbcl2 is not None and len(dbcl2) > 0:
+                self.dbcl2 = dbcl2[0]
         
-            uid = self.dbcl2.split(':')[0]
-            self.uid = uid
+                uid = self.dbcl2.split(':')[0]
+                self.uid = uid
 
-        bid = re.findall('bid="(.*?)"', resultCookie)[0]
-        self.bid = bid
+            bid = re.findall('bid="(.*?)"', resultCookie)[0]
+            self.bid = bid
     
     def __format_list__(self, sidlist, verb=None):
         if sidlist is None or len(sidlist) == 0:
@@ -101,16 +98,14 @@ class DoubanRadio():
 
     
     def __remote_fm__(self, params):
-        conn = httplib.HTTPConnection("douban.fm")
         data = urllib.urlencode(params)
         cookie = 'dbcl2="%s"; bid="%s"' % (self.dbcl2, self.bid)
         header = {"Cookie": cookie}
+        with contextlib.closing(httplib.HTTPConnection("douban.fm")) as conn:
+            conn.request('GET', "/j/mine/playlist?"+data, None, header)
+            result = conn.getresponse().read()
 
-        conn.request('GET', "/j/mine/playlist?"+data, None, header)
-        result = conn.getresponse().read()
-
-        conn.close()
-        return result
+            return result
 
     def del_song(self, sid, aid, rest=[]):
         params = self.__get_default_params__('b')
@@ -145,10 +140,11 @@ class DoubanRadio():
         result = self.__remote_fm__(params)
         return json.loads(result)['song']
 
-    def played_song(self, sid, aid):
+    def played_song(self, sid, aid, du=0):
         params  = self.__get_default_params__('e')
         params['sid'] = sid
         params['aid'] = aid
+        params['du'] = du
 
         self.__remote_fm__(params)
 

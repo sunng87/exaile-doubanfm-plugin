@@ -24,7 +24,7 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdbfm import DoubanRadio
+from libdbfm import DoubanFM
 from doubanfm_mode import DoubanfmMode
 import dbfm_pref
 
@@ -66,7 +66,7 @@ class DoubanRadioPlugin(object):
     @common.threaded
     def __init__(self, exaile, username ,password):
         
-        self.doubanfm = DoubanRadio(username, password)
+        self.doubanfm = DoubanFM(username, password)
         self.exaile = exaile
         self.__create_menu_item__()
 
