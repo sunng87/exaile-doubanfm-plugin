@@ -31,6 +31,7 @@ import json
 import re
 import random
 import contextlib
+from Cookie import SimpleCookie
 
 class DoubanFM():
     def __init__ (self, username, password):
@@ -53,16 +54,16 @@ class DoubanFM():
             conn.request("POST", "/accounts/login", data, headers)
         
             r1 = conn.getresponse()
-            resultCookie = r1.getheader('Set-Cookie')
+            resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
 
-            dbcl2 = re.findall('dbcl2="(.*?)"', resultCookie)
+            dbcl2 = resultCookie['dbcl2'].value
             if dbcl2 is not None and len(dbcl2) > 0:
-                self.dbcl2 = dbcl2[0]
+                self.dbcl2 = dbcl2
         
                 uid = self.dbcl2.split(':')[0]
                 self.uid = uid
 
-            bid = re.findall('bid="(.*?)"', resultCookie)[0]
+            bid = resultCookie['bid'].value
             self.bid = bid
     
     def __format_list__(self, sidlist, verb=None):
