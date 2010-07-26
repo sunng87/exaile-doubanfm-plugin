@@ -7,6 +7,7 @@ Intro
 -----
 
 There is a minimized view for DoubanFM tracks, you can:
+
 * Mark a track as favorite or not
 * Skip a track
 * Delete a track
