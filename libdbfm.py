@@ -38,12 +38,17 @@ class DoubanFM():
         self.uid = None
         self.dbcl2 = None
         self.bid = None
-        self.channel = 0
+        self._channel = 0
         self.__login__(username, password)
         pass
     
-    def set_channel(self, channel):
-        self.channel = channel
+	@property
+	def channel(self):
+		return self._channel
+
+	@channel.setter
+	def channel(self, value):
+		self._channel = value
 
     def __login__(self, username, password):
         data = urllib.urlencode({

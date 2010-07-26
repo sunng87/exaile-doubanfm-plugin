@@ -188,17 +188,15 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def play_feedback(self, type, player, current_track):
-        if isinstance(self.last_track, DoubanFMTrack):
+        if isinstance(current_track, DoubanFMTrack):
             if self.skipped:
                 self.skipped = False
-                #self.last_track = current_track
                 return
             track = current_track
             sid = track.sid
             aid = track.aid
             if sid is not None and aid is not None:
                 self.doubanfm.played_song(sid, aid)
-#            self.last_track = current_track
 
     def get_current_playlist(self):
         return self.exaile.gui.main.get_selected_playlist().playlist
@@ -301,7 +299,7 @@ class DoubanRadioPlugin(object):
     def active_douban_radio(self, type, channel_name):
         channel_id = self.channels[channel_name]    
 
-        self.doubanfm.set_channel(channel_id)
+        self.doubanfm.channel = channel_id
         try:
             songs = self.doubanfm.new_playlist()
         except:
@@ -318,8 +316,6 @@ class DoubanRadioPlugin(object):
         
         self.exaile.gui.main.add_playlist(plist)
 #       self.play(plist)
-
-        self.last_track = plist.get_ordered_tracks()[0]
 
 #       self.doubanfm_mode.show()
 
