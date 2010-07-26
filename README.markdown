@@ -12,7 +12,7 @@ There is a minimized view for DoubanFM tracks, you can:
 * Delete a track
 * Douban covers support, fast retrieve album art from Douban.com
 
-![DoubanFM Mode](http://www.flickr.com/photos/40741608@N08/4760493886/ "Douban FM Mode")
+![DoubanFM Mode](http://farm5.static.flickr.com/4075/4760493886_5e334726cf.jpg "Douban FM Mode")
 
 
 
