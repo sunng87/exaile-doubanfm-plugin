@@ -284,6 +284,6 @@
   </object>
   <object class="GtkImage" id="image7">
     <property name="visible">True</property>
-    <property name="icon_name">www-browser</property>
+    <property name="icon_name">go-jump</property>
   </object>
 </interface>
