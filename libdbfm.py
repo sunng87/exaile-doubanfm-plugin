@@ -33,6 +33,9 @@ import random
 import contextlib
 from Cookie import SimpleCookie
 
+class LoginException():
+    pass
+
 class DoubanFM():
     def __init__ (self, username, password):
         self.uid = None
@@ -60,6 +63,9 @@ class DoubanFM():
         
             r1 = conn.getresponse()
             resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
+
+            if not resultCookie.has_key('dbcl2'):
+                raise LoginException()
 
             dbcl2 = resultCookie['dbcl2'].value
             if dbcl2 is not None and len(dbcl2) > 0:
@@ -96,7 +102,7 @@ class DoubanFM():
 
         params['r'] = random.random()
         params['uid'] = self.uid
-        params['channel'] = self.channel
+        params['channel'] = self._channel
         if typename is not None:
             params['type'] = typename
 

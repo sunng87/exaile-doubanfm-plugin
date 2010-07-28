@@ -1,6 +1,6 @@
 import unittest
 
-from libdbfm import DoubanFM
+from libdbfm import DoubanFM, LoginException
 
 class TestLibDoubanfm(unittest.TestCase):
     def setUp(self):
@@ -10,6 +10,14 @@ class TestLibDoubanfm(unittest.TestCase):
         result = self.libdbfm.new_playlist()
         self.assertNotEqual(None, result)
         self.assertTrue(len(result) > 0)
+
+    def test_login_fail(self):
+        try:
+            lidbfm = DoubanFM('not_a_user_name', '111')
+            self.fail('should not here')
+        except LoginException:
+            self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()
