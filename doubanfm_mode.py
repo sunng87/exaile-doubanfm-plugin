@@ -52,7 +52,9 @@ class DoubanfmMode():
             'on_delete_button_clicked': self.on_delete_button_clicked,
             'on_go_home_button_clicked': self.on_go_home_button_clicked,
             'on_volume_slider_value_changed': self.on_volume_slider_value_changed,
-            'on_volume_mute_button_toggled': self.on_volume_mute_button_toggled
+            'on_volume_mute_button_toggled': self.on_volume_mute_button_toggled,
+            'on_button_setting_clicked': self.on_button_setting_clicked,
+            'on_button_album_clicked': self.on_button_album_clicked
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -163,6 +165,17 @@ class DoubanfmMode():
         else:
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
+
+    def on_button_setting_clicked(self, *e):
+        os.popen(' '.join(['xdg-open', 'http://douban.fm/mine']))	
+
+    def on_button_album_clicked(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        if track is not None:
+            aid = track.aid
+            url = "http://music.douban.com/subject/%s/" % aid
+            os.popen(' '.join(['xdg-open', url]))
+		
 
     def destroy(self):
         self.window.destroy()

@@ -29,6 +29,7 @@ from doubanfm_mode import DoubanfmMode
 import dbfm_pref
 
 import gtk
+import time
 
 from xl import common, event, main, playlist, xdg, settings, trax
 from xl.radio import *
@@ -119,11 +120,25 @@ class DoubanRadioPlugin(object):
         sid = track.sid
         aid = track.aid
         songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
-        if self.get_tracks_remain() < 15:
-            tracks = map(self.create_track_from_douban_song, songs)
+        
+        self.load_more_tracks(songs)
 
-            playlist.add_tracks(tracks)
         track.set_rating2(2)
+
+    def load_more_tracks(self, songs):
+        tracks = map(self.create_track_from_douban_song, songs)
+        playlist = self.get_current_playlist()
+
+#        if self.get_tracks_remain() > 15:
+#            for i in range(len(tracks)):
+#                ## just a walk around
+#                time.sleep(1)
+#
+#                playlist.remove(len(playlist)-1)
+
+        if self.get_tracks_remain() < 15:
+            playlist.add_tracks(tracks)
+            
 
     @common.threaded
     def mark_as_like(self, track):
@@ -156,10 +171,9 @@ class DoubanRadioPlugin(object):
         sid = track.sid
         aid = track.aid
         songs = self.doubanfm.del_song(sid, aid, rest=rest_sids)
-        if self.get_tracks_remain() < 15:
-            tracks = map(self.create_track_from_douban_song, songs)
 
-            playlist.add_tracks(tracks)
+        self.load_more_tracks(songs)
+
         track.set_rating2(1)
 
     def get_rest_sids(self, playlist):
@@ -178,7 +192,10 @@ class DoubanRadioPlugin(object):
 
     def get_current_track(self):
         pl = self.exaile.gui.main.get_current_playlist().playlist
-        return pl.get_tracks()[pl.get_current_pos()]
+        if isinstance(pl, DoubanFMPlaylist):
+	        return pl.get_tracks()[pl.get_current_pos()]
+        else:
+            return None
 
     def remove_current_track(self):
         self.exaile.gui.main.get_current_playlist().remove_selected_tracks()
