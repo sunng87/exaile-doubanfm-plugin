@@ -32,6 +32,7 @@ import os
 from xl import xdg, event, settings
 from xlgui import cover, guiutil, tray
 from xlgui.main import PlaybackProgressBar
+from xlgui.widgets import info
 
 def get_resource_path(filename):
     basedir = os.path.dirname(os.path.realpath(__file__))
@@ -60,15 +61,14 @@ class DoubanfmMode():
         self.window.connect('destroy', self.hide)
 
         volume = settings.get_option('player/volume', 1)
-        self.volume_scale = self.builder.get_object('volume_scale')
-        self.volume_scale.set_value(volume)
 
         self.volume_control = guiutil.VolumeControl()
         self.builder.get_object('hbox2').pack_start(self.volume_control)
 
         self.cover_box = self.builder.get_object('cover_eventbox1')
-        self.cover = cover.CoverWidget(self.window, self.exaile.covers, self.exaile.player)
-        self.cover_box.add(self.cover)
+        self.info_area = info.TrackInfoPane(auto_update=True)
+        self.cover = cover.CoverWidget(self.cover_box)
+#        self.cover_box.add(self.cover)
 
         self.track_title_label = self.builder.get_object('track_title_label')
         self.track_info_label = self.builder.get_object('track_info_label')
