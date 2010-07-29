@@ -54,7 +54,8 @@ class DoubanfmMode():
             'on_volume_slider_value_changed': self.on_volume_slider_value_changed,
             'on_volume_mute_button_toggled': self.on_volume_mute_button_toggled,
             'on_button_setting_clicked': self.on_button_setting_clicked,
-            'on_button_album_clicked': self.on_button_album_clicked
+            'on_button_album_clicked': self.on_button_album_clicked,
+            'on_button_report_clicked': self.on_button_report_clicked
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -175,7 +176,14 @@ class DoubanfmMode():
             aid = track.aid
             url = "http://music.douban.com/subject/%s/" % aid
             os.popen(' '.join(['xdg-open', url]))
-		
+
+    def on_button_report_clicked(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        if track is not None:
+            aid = track.aid
+            sid = track.sid
+            url = "http://music.douban.com/subject/%s/report?song_id=%s" % (aid, sid)
+            os.popen(' '.join(['xdg-open', url]))
 
     def destroy(self):
         self.window.destroy()
