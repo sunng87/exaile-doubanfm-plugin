@@ -24,7 +24,7 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdbfm import DoubanFM
+from libdoubanfm import DoubanFM
 from doubanfm_mode import DoubanfmMode
 import dbfm_pref
 
