@@ -33,6 +33,8 @@ import random
 import contextlib
 from Cookie import SimpleCookie
 
+__all__ = ['LoginException', 'DoubanFM']
+
 class LoginException():
     pass
 
