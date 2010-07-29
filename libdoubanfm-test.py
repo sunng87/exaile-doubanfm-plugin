@@ -1,6 +1,6 @@
 import unittest
 
-from libdbfm import DoubanFM, LoginException
+from libdoubanfm import DoubanFM, LoginException
 
 class TestLibDoubanfm(unittest.TestCase):
     def setUp(self):
