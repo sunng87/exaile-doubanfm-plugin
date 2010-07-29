@@ -25,7 +25,7 @@
 # from your version.
 
 import os
-from xlgui.prefs import widgets
+from xlgui.preferences import widgets
 from xl.nls import gettext as _
 
 
@@ -33,11 +33,11 @@ name = _('Douban.fm')
 basedir = os.path.dirname(os.path.realpath(__file__))
 ui = os.path.join(basedir, 'dbfm_pref.ui')
 
-class UsernamePreference(widgets.PrefsItem):
+class UsernamePreference(widgets.Preference):
     default = ''
     name = 'plugin/douban_radio/username'
 
-class PasswordPreference(widgets.PrefsItem):
+class PasswordPreference(widgets.Preference):
     default = ''
     name = 'plugin/douban_radio/password'
 

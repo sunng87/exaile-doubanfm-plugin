@@ -51,8 +51,6 @@ class DoubanfmMode():
             'on_skip_button_clicked': self.on_skip_button_clicked,
             'on_delete_button_clicked': self.on_delete_button_clicked,
             'on_go_home_button_clicked': self.on_go_home_button_clicked,
-            'on_volume_slider_value_changed': self.on_volume_slider_value_changed,
-            'on_volume_mute_button_toggled': self.on_volume_mute_button_toggled,
             'on_button_setting_clicked': self.on_button_setting_clicked,
             'on_button_album_clicked': self.on_button_album_clicked,
             'on_button_report_clicked': self.on_button_report_clicked
@@ -65,8 +63,8 @@ class DoubanfmMode():
         self.volume_scale = self.builder.get_object('volume_scale')
         self.volume_scale.set_value(volume)
 
-        self.mute_button = guiutil.MuteButton(self.builder.get_object('volume_mute_button'))
-        self.mute_button.update_volume_icon(volume)
+        self.volume_control = guiutil.VolumeControl()
+        self.builder.get_object('hbox2').pack_start(self.volume_control)
 
         self.cover_box = self.builder.get_object('cover_eventbox1')
         self.cover = cover.CoverWidget(self.window, self.exaile.covers, self.exaile.player)
@@ -142,13 +140,6 @@ class DoubanfmMode():
 
     def on_go_home_button_clicked(self, *e):
         self.hide(e)
-
-    def on_volume_mute_button_toggled(self, *e):
-        pass
-
-    def on_volume_slider_value_changed(self, widget):
-        settings.set_option('player/volume', widget.get_value())
-        pass
 
     def on_playback_start(self, type, player, data):
         track = player.current
