@@ -35,10 +35,10 @@ from Cookie import SimpleCookie
 
 __all__ = ['DoubanFM', 'LoginException', 'DoubanFMChannels']
 
-class LoginException():
+class LoginException(object):
     pass
 
-class DoubanFM():
+class DoubanFM(object):
     def __init__ (self, username, password):
         self.uid = None
         self.dbcl2 = None
