@@ -24,7 +24,7 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdoubanfm import DoubanFM
+from libdoubanfm import DoubanFM, DoubanFMChannels
 from doubanfm_mode import DoubanFMMode
 from doubanfm_track import DoubanFMTrack
 import dbfm_pref
@@ -63,13 +63,12 @@ def get_prefs_pane():
 
 
 class DoubanRadioPlugin(object):
-    channels = {_('Personalized'):0, _('Mandarin'):1, _('Western'):2, 
-            _('Cantonese'): 6, _('70s'): 3, _('80s'): 4, _('90s'): 5}
-
     @common.threaded
     def __init__(self, exaile, username ,password):
         
         self.doubanfm = DoubanFM(username, password)
+        self.channels = DoubanRadioPlugin.__translate_channels()
+
         self.exaile = exaile
         self.__create_menu_item__()
 
@@ -79,6 +78,12 @@ class DoubanRadioPlugin(object):
         ## mark if a track is skipped instead of end normally
         self.skipped = False
 
+    @staticmethod
+    def __translate_channels():
+        d = {}
+        for k in DoubanFMChannels.keys():
+            d[_(k)] = DoubanFMChannels[k]
+        return d
 
     def __register_events(self):
         event.add_callback(self.check_to_load_more, 'playback_track_start')

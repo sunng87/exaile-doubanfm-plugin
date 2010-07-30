@@ -33,6 +33,8 @@ import random
 import contextlib
 from Cookie import SimpleCookie
 
+__all__ = ['DoubanFM', 'LoginException', 'DoubanFMChannels']
+
 class LoginException():
     pass
 
@@ -45,13 +47,13 @@ class DoubanFM():
         self.__login__(username, password)
         pass
     
-	@property
-	def channel(self):
-		return self._channel
+    @property
+    def channel(self):
+        return self._channel
 
-	@channel.setter
-	def channel(self, value):
-		self._channel = value
+    @channel.setter
+    def channel(self, value):
+        self._channel = value
 
     def __login__(self, username, password):
         data = urllib.urlencode({
@@ -102,7 +104,8 @@ class DoubanFM():
 
         params['r'] = random.random()
         params['uid'] = self.uid
-        params['channel'] = self._channel
+        params['channel'] = self.channel
+
         if typename is not None:
             params['type'] = typename
 
@@ -167,5 +170,7 @@ class DoubanFM():
         results = self.__remote_fm__(params)
         return json.loads(results)['song']
 
+DoubanFMChannels = {'Personalized':0, 'Mandarin':1, 'Western':2, 
+            'Cantonese': 6, '70s': 3, '80s': 4, '90s': 5}
 
 
