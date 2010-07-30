@@ -25,7 +25,8 @@
 # from your version.
 
 from libdoubanfm import DoubanFM
-from doubanfm_mode import DoubanfmMode
+from doubanfm_mode import DoubanFMMode
+from doubanfm_track import DoubanFMTrack
 import dbfm_pref
 
 import gtk
@@ -35,6 +36,7 @@ from xl import common, event, main, playlist, xdg, settings, trax
 from xl.radio import *
 from xl.nls import gettext as _
 from xlgui import guiutil
+
 
 DOUBANFM = None
 
@@ -72,7 +74,7 @@ class DoubanRadioPlugin(object):
         self.__create_menu_item__()
 
         self.__register_events()
-        self.doubanfm_mode = DoubanfmMode(self.exaile, self)
+        self.doubanfm_mode = DoubanFMMode(self.exaile, self)
 
         ## mark if a track is skipped instead of end normally
         self.skipped = False
@@ -317,48 +319,7 @@ class DoubanRadioPlugin(object):
 
         self.doubanfm_mode.destroy()
         pass
-
-class DoubanFMTrack(object):
-    def __init__(self, uri, aid, sid, fav):
-        self._track = trax.Track(uri)
-        self._sid = sid
-        self._aid = aid
-        self._fav = fav
-
-        self.bind_douban_tags(self._track, aid, sid, fav)
-
-    @classmethod
-    def is_douban_track(self, track):
-        return track.get_tag_raw('_DoubanFM_') is not None
-
-    @property
-    def sid(self):
-        return self._sid
-
-    @property
-    def aid(self):
-        return self._aid
-
-    @property
-    def fav(self):
-        return self._fav
-
-    @property
-    def track(self):
-        return self._track
-
-    def bind_douban_tags(self, track, aid, sid, fav):
-        self._track.set_tag_raw('aid', aid)
-        self._track.set_tag_raw('sid', sid)
-        self._track.set_tag_raw('fav', fav)
-        self._track.set_tag_raw('_DoubanFM_', True)
-
-    def set_tag_raw(self, name, value):
-        self._track.set_tag_raw(name, value)
-
-    def get_tag_raw(self, name):
-        self._track.get_tag_raw(name)
-        
+       
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name):
         playlist.Playlist.__init__(self, name)

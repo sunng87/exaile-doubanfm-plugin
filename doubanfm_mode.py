@@ -34,12 +34,14 @@ from xlgui import cover, guiutil, tray
 from xlgui.main import PlaybackProgressBar
 from xlgui.widgets import info
 
+from doubanfm_track import DoubanFMTrack
+
 def get_resource_path(filename):
     basedir = os.path.dirname(os.path.realpath(__file__))
     resource = os.path.join(basedir, filename)
     return resource
 
-class DoubanfmMode():
+class DoubanFMMode():
     def __init__(self, exaile, doubanfm_plugin):
         self.exaile = exaile
         self.dbfm_plugin = doubanfm_plugin
@@ -114,7 +116,7 @@ class DoubanfmMode():
 
     def on_bookmark_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not self.dbfm_plugin.is_douban_track(track):
+        if not DoubanFMTrack.is_douban_track(track):
             return
 
         if track.get_rating() == 5:
@@ -128,13 +130,13 @@ class DoubanfmMode():
 
     def on_skip_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not self.dbfm_plugin.is_douban_track(track):
+        if not DoubanFMTrack.is_douban_track(track):
             return
         self.dbfm_plugin.mark_as_skip(track)
 
     def on_delete_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not self.dbfm_plugin.is_douban_track(track):
+        if not DoubanFMTrack.is_douban_track(track):
             return
         self.dbfm_plugin.mark_as_recycle(track)
 
