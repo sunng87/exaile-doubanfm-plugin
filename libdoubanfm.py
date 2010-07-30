@@ -38,7 +38,7 @@ __all__ = ['LoginException', 'DoubanFM']
 class LoginException():
     pass
 
-class DoubanFM():
+class DoubanFM(object):
     def __init__ (self, username, password):
         self.uid = None
         self.dbcl2 = None
