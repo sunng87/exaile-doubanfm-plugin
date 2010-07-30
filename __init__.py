@@ -82,30 +82,11 @@ class DoubanRadioPlugin(object):
         event.add_callback(self.check_to_load_more, 'playback_track_start')
         event.add_callback(self.close_playlist, 'quit_application')
         event.add_callback(self.play_feedback, 'playback_track_end')
-        event.add_callback(self.user_feedback, 'doubanfm_track_rating_change')
 
     def __unregister_events(self):
         event.remove_callback(self.check_to_load_more, 'playback_track_start')
         event.remove_callback(self.close_playlist, 'quit_application')
         event.remove_callback(self.play_feedback, 'playback_track_end')
-        event.remove_callback(self.user_feedback, 'doubanfm_track_rating_change')
-
-    def user_feedback(self, type, track, rating_pair) :
-        prev_rating, rating = rating_pair
-        if rating == 1:
-            ## mark to recycle
-            self.mark_as_recycle(track)
-        if rating == 2 and prev_rating != 2:
-            self.mark_as_skip(track)
-        if prev_rating == 5 and rating < 5:
-            ## mark to dislike
-            self.mark_as_dislike(track)
-        if rating == 5 and prev_rating < 5:
-            ## mark to like
-            self.mark_as_like(track)
-
-    def is_douban_track(self, track):
-        return track.get_tag_raw('_DoubanFM_') is not None
 
     @common.threaded
     def mark_as_skip(self, track):
@@ -199,7 +180,7 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def play_feedback(self, type, player, current_track):
-        if self.is_douban_track(current_track):
+        if DoubanFMTrack.is_douban_track(current_track):
             if self.skipped:
                 self.skipped = False
                 return
@@ -281,14 +262,13 @@ class DoubanRadioPlugin(object):
     def create_track_from_douban_song(self, song):
         uri = song['url']
 
-        track = trax.Track(uri)
-        self.bind_douban_tags(track, song['aid'], song['sid'], song['like'])
-        track.set_tag_raw('title', song['title'])
-        track.set_tag_raw('artist', song['artist'])
-        track.set_tag_raw('album', song['albumtitle'])
-        track.set_tag_raw('cover_url', song['picture'])
+        doubanTrack = DoubanFMTrack(uri, song['aid'], song['sid'], song['like'])
+        doubanTrack.set_tag_raw('title', song['title'])
+        doubanTrack.set_tag_raw('artist', song['artist'])
+        doubanTrack.set_tag_raw('album', song['albumtitle'])
+        doubanTrack.set_tag_raw('cover_url', song['picture'])
 
-        return track
+        return doubanTrack.track
 
     def show_mode(self, *e):
         self.doubanfm_mode.show()
@@ -338,12 +318,46 @@ class DoubanRadioPlugin(object):
         self.doubanfm_mode.destroy()
         pass
 
+class DoubanFMTrack(object):
+    def __init__(self, uri, aid, sid, fav):
+        self._track = trax.Track(uri)
+        self._sid = sid
+        self._aid = aid
+        self._fav = fav
+
+        self.bind_douban_tags(self._track, aid, sid, fav)
+
+    @classmethod
+    def is_douban_track(self, track):
+        return track.get_tag_raw('_DoubanFM_') is not None
+
+    @property
+    def sid(self):
+        return self._sid
+
+    @property
+    def aid(self):
+        return self._aid
+
+    @property
+    def fav(self):
+        return self._fav
+
+    @property
+    def track(self):
+        return self._track
+
     def bind_douban_tags(self, track, aid, sid, fav):
-        track.set_tag_raw('aid', aid)
-        track.set_tag_raw('sid', sid)
-        track.set_tag_raw('fav', fav)
-        track.set_tag_raw('_DoubanFM_', True)
-        return track
+        self._track.set_tag_raw('aid', aid)
+        self._track.set_tag_raw('sid', sid)
+        self._track.set_tag_raw('fav', fav)
+        self._track.set_tag_raw('_DoubanFM_', True)
+
+    def set_tag_raw(self, name, value):
+        self._track.set_tag_raw(name, value)
+
+    def get_tag_raw(self, name):
+        self._track.get_tag_raw(name)
         
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name):
