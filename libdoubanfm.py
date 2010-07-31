@@ -35,7 +35,7 @@ from Cookie import SimpleCookie
 
 __all__ = ['DoubanFM', 'LoginException', 'DoubanFMChannels']
 
-class LoginException(object):
+class LoginException(Exception):
     pass
 
 class DoubanFM(object):
