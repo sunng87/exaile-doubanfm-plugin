@@ -41,5 +41,3 @@ class PasswordPreference(widgets.Preference):
     default = ''
     name = 'plugin/douban_radio/password'
 
-
-
