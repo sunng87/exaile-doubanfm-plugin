@@ -58,7 +58,7 @@ def disable(exaile):
     DOUBANFM.destroy(exaile)
     pass
 
-def get_prefs_pane():
+def get_preferences_pane():
     return dbfm_pref
 
 
