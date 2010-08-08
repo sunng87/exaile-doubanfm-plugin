@@ -27,6 +27,7 @@
 
 import gtk
 import gtk.glade
+import pango
 import os
 
 from xl import xdg, event, settings
@@ -73,6 +74,10 @@ class DoubanFMMode():
 #        self.cover_box.add(self.cover)
 
         self.track_title_label = self.builder.get_object('track_title_label')
+        attr = pango.AttrList()
+        attr.change(pango.AttrWeight(pango.WEIGHT_BOLD, 0, 800))
+        attr.change(pango.AttrSize(12500, 0, 600))
+        self.track_title_label.set_attributes(attr)
         self.track_info_label = self.builder.get_object('track_info_label')
 
         self.bookmark_button = self.builder.get_object('bookmark_button')
@@ -150,7 +155,7 @@ class DoubanFMMode():
         title = track.get_tag_raw('title')[0]
 
         self.window.set_title(u"豆瓣电台 %s - %s Exaile" % (title, artist))
-        self.track_title_label.set_label("<big><b>%s - %s</b></big>" %(title, artist))
+        self.track_title_label.set_label("%s - %s" %(title, artist))
         self.track_info_label.set_label(album)
         
         if track.get_rating() == 5:
