@@ -24,8 +24,10 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdoubanfm import DoubanFM
-from doubanfm_mode import DoubanfmMode
+from libdoubanfm import DoubanFM, DoubanFMChannels
+from doubanfm_mode import DoubanFMMode
+from doubanfm_track import DoubanFMTrack
+
 import dbfm_pref
 
 import gtk
@@ -35,6 +37,7 @@ from xl import common, event, main, playlist, xdg, settings, trax
 from xl.radio import *
 from xl.nls import gettext as _
 from xlgui import guiutil
+
 
 DOUBANFM = None
 
@@ -56,56 +59,42 @@ def disable(exaile):
     DOUBANFM.destroy(exaile)
     pass
 
-def get_prefs_pane():
+def get_preferences_pane():
     return dbfm_pref
 
 
 class DoubanRadioPlugin(object):
-    channels = {_('Personalized'):0, _('Mandarin'):1, _('Western'):2, 
-            _('Cantonese'): 6, _('70s'): 3, _('80s'): 4, _('90s'): 5}
-
     @common.threaded
     def __init__(self, exaile, username ,password):
         
         self.doubanfm = DoubanFM(username, password)
+        self.channels = DoubanRadioPlugin.__translate_channels()
+
         self.exaile = exaile
         self.__create_menu_item__()
 
         self.__register_events()
-        self.doubanfm_mode = DoubanfmMode(self.exaile, self)
+        self.doubanfm_mode = DoubanFMMode(self.exaile, self)
 
         ## mark if a track is skipped instead of end normally
         self.skipped = False
 
+    @staticmethod
+    def __translate_channels():
+        d = {}
+        for k in DoubanFMChannels.keys():
+            d[_(k)] = DoubanFMChannels[k]
+        return d
 
     def __register_events(self):
         event.add_callback(self.check_to_load_more, 'playback_track_start')
         event.add_callback(self.close_playlist, 'quit_application')
         event.add_callback(self.play_feedback, 'playback_track_end')
-        event.add_callback(self.user_feedback, 'doubanfm_track_rating_change')
 
     def __unregister_events(self):
         event.remove_callback(self.check_to_load_more, 'playback_track_start')
         event.remove_callback(self.close_playlist, 'quit_application')
         event.remove_callback(self.play_feedback, 'playback_track_end')
-        event.remove_callback(self.user_feedback, 'doubanfm_track_rating_change')
-
-    def user_feedback(self, type, track, rating_pair) :
-        prev_rating, rating = rating_pair
-        if rating == 1:
-            ## mark to recycle
-            self.mark_as_recycle(track)
-        if rating == 2 and prev_rating != 2:
-            self.mark_as_skip(track)
-        if prev_rating == 5 and rating < 5:
-            ## mark to dislike
-            self.mark_as_dislike(track)
-        if rating == 5 and prev_rating < 5:
-            ## mark to like
-            self.mark_as_like(track)
-
-    def is_douban_track(self, track):
-        return isinstance(track, DoubanFMTrack)
 
     @common.threaded
     def mark_as_skip(self, track):
@@ -117,13 +106,11 @@ class DoubanRadioPlugin(object):
         ## play next song
         self.exaile.gui.main.queue.next()
 
-        sid = track.sid
-        aid = track.aid
+        sid = track.get_tag_raw('sid')
+        aid = track.get_tag_raw('aid')
         songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
         
         self.load_more_tracks(songs)
-
-        track.set_rating2(2)
 
     def load_more_tracks(self, songs):
         tracks = map(self.create_track_from_douban_song, songs)
@@ -142,18 +129,16 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def mark_as_like(self, track):
-        sid = track.sid
-        aid = track.aid
+        sid = track.get_tag_raw('sid')
+        aid = track.get_tag_raw('aid')
         self.doubanfm.fav_song(sid, aid)
-        track.set_rating2(5)
 
     @common.threaded
     def mark_as_dislike(self, track):
-        sid = track.sid
-        aid = track.aid
+        sid = track.get_tag_raw('sid')
+        aid = track.get_tag_raw('aid')
 
         self.doubanfm.unfav_song(sid, aid)
-        track.set_rating2(3)
 
     @common.threaded
     def mark_as_recycle(self, track):
@@ -168,13 +153,11 @@ class DoubanRadioPlugin(object):
         ## remove the track
         self.remove_current_track()
 
-        sid = track.sid
-        aid = track.aid
+        sid = track.get_tag_raw('sid')
+        aid = track.get_tag_raw('aid')
         songs = self.doubanfm.del_song(sid, aid, rest=rest_sids)
 
         self.load_more_tracks(songs)
-
-        track.set_rating2(1)
 
     def get_rest_sids(self, playlist):
         playlist = self.get_current_playlist()
@@ -201,17 +184,17 @@ class DoubanRadioPlugin(object):
         self.exaile.gui.main.get_current_playlist().remove_selected_tracks()
 
     def tracks_to_sids(self, tracks):
-        return map(lambda t: t.sid, tracks)
+        return map(lambda t: t.get_tag_raw('sid'), tracks)
 
     @common.threaded
     def play_feedback(self, type, player, current_track):
-        if isinstance(current_track, DoubanFMTrack):
+        if DoubanFMTrack.is_douban_track(current_track):
             if self.skipped:
                 self.skipped = False
                 return
             track = current_track
-            sid = track.sid
-            aid = track.aid
+            sid = track.get_tag_raw('sid')
+            aid = track.get_tag_raw('aid')
             if sid is not None and aid is not None:
                 self.doubanfm.played_song(sid, aid)
 
@@ -287,28 +270,24 @@ class DoubanRadioPlugin(object):
     def create_track_from_douban_song(self, song):
         uri = song['url']
 
-        track = DoubanFMTrack(uri, song['sid'], song['aid'], song['like'])
-        track.set_tag_raw('title', song['title'])
-        track.set_tag_raw('artist', song['artist'])
-        track.set_tag_raw('album', song['albumtitle'])
-        track.set_tag_raw('cover_url', song['picture'])
+        doubanTrack = DoubanFMTrack(uri, song['aid'], song['sid'], song['like'])
+        doubanTrack.set_tag_raw('title', song['title'])
+        doubanTrack.set_tag_raw('artist', song['artist'])
+        doubanTrack.set_tag_raw('album', song['albumtitle'])
+        doubanTrack.set_tag_raw('cover_url', song['picture'])
 
-        return track
+        return doubanTrack.track
 
     def show_mode(self, *e):
         self.doubanfm_mode.show()
 
     def create_playlist(self, name, initial_tracks=[]):
         ## to update in 0.3.2 
-        ## plist = DoubanFMPlaylist(name, initial_tracks)
         plist = DoubanFMPlaylist(name)
         plist.set_ordered_tracks(initial_tracks)
 
-        ## set_shuffle_mode('disabled')
-        plist.set_random(False)
-        ## set_repeat_mode('disabled')
         plist.set_repeat(False)
-        ## set_dynamic_mode('disabled')
+        plist.set_random(False)
         plist.set_dynamic(False)
 
         return plist
@@ -346,31 +325,9 @@ class DoubanRadioPlugin(object):
 
         self.doubanfm_mode.destroy()
         pass
-        
+       
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name):
         playlist.Playlist.__init__(self, name)
         pass
-
-class DoubanFMTrack(trax.Track):
-    def __init__(self, uri, sid, aid, fav):
-        trax.Track.__init__(self, uri)
-        self.sid = sid
-        self.aid = aid
-
-        if fav == "1":
-            trax.Track.set_rating(self, 5)
-        else:
-            trax.Track.set_rating(self, 3)
-
-    def set_rating(self, rating):
-        prev_rating = trax.Track.get_rating(self)
-        trax.Track.set_rating(self, rating)
-        
-        event.log_event('doubanfm_track_rating_change', 
-                self, (prev_rating, rating))
-
-    def set_rating2(self, rating):
-        trax.Track.set_rating(self, rating)
-    
-        
+       

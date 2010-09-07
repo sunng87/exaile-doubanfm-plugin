@@ -33,13 +33,16 @@ import os
 from xl import xdg, event, settings
 from xlgui import cover, guiutil, tray
 from xlgui.main import PlaybackProgressBar
+from xlgui.widgets import info
+
+from doubanfm_track import DoubanFMTrack
 
 def get_resource_path(filename):
     basedir = os.path.dirname(os.path.realpath(__file__))
     resource = os.path.join(basedir, filename)
     return resource
 
-class DoubanfmMode():
+class DoubanFMMode():
     def __init__(self, exaile, doubanfm_plugin):
         self.exaile = exaile
         self.dbfm_plugin = doubanfm_plugin
@@ -52,8 +55,6 @@ class DoubanfmMode():
             'on_skip_button_clicked': self.on_skip_button_clicked,
             'on_delete_button_clicked': self.on_delete_button_clicked,
             'on_go_home_button_clicked': self.on_go_home_button_clicked,
-            'on_volume_slider_value_changed': self.on_volume_slider_value_changed,
-            'on_volume_mute_button_toggled': self.on_volume_mute_button_toggled,
             'on_button_setting_clicked': self.on_button_setting_clicked,
             'on_button_album_clicked': self.on_button_album_clicked,
             'on_button_report_clicked': self.on_button_report_clicked
@@ -63,15 +64,14 @@ class DoubanfmMode():
         self.window.connect('destroy', self.hide)
 
         volume = settings.get_option('player/volume', 1)
-        self.volume_scale = self.builder.get_object('volume_scale')
-        self.volume_scale.set_value(volume)
 
-        self.mute_button = guiutil.MuteButton(self.builder.get_object('volume_mute_button'))
-        self.mute_button.update_volume_icon(volume)
+        self.volume_control = guiutil.VolumeControl()
+        self.builder.get_object('hbox2').pack_start(self.volume_control)
 
         self.cover_box = self.builder.get_object('cover_eventbox1')
-        self.cover = cover.CoverWidget(self.window, self.exaile.covers, self.exaile.player)
-        self.cover_box.add(self.cover)
+        self.info_area = info.TrackInfoPane(auto_update=True)
+        self.cover = cover.CoverWidget(self.cover_box)
+#        self.cover_box.add(self.cover)
 
         self.track_title_label = self.builder.get_object('track_title_label')
         attr = pango.AttrList()
@@ -121,7 +121,7 @@ class DoubanfmMode():
 
     def on_bookmark_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not self.dbfm_plugin.is_douban_track(track):
+        if not DoubanFMTrack.is_douban_track(track):
             return
 
         if track.get_rating() == 5:
@@ -135,25 +135,18 @@ class DoubanfmMode():
 
     def on_skip_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not self.dbfm_plugin.is_douban_track(track):
+        if not DoubanFMTrack.is_douban_track(track):
             return
         self.dbfm_plugin.mark_as_skip(track)
 
     def on_delete_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not self.dbfm_plugin.is_douban_track(track):
+        if not DoubanFMTrack.is_douban_track(track):
             return
         self.dbfm_plugin.mark_as_recycle(track)
 
     def on_go_home_button_clicked(self, *e):
         self.hide(e)
-
-    def on_volume_mute_button_toggled(self, *e):
-        pass
-
-    def on_volume_slider_value_changed(self, widget):
-        settings.set_option('player/volume', widget.get_value())
-        pass
 
     def on_playback_start(self, type, player, data):
         track = player.current

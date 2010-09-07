@@ -24,20 +24,46 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-import os
-from xlgui.preferences import widgets
-from xl.nls import gettext as _
+from xl import trax
 
+class DoubanFMTrack(object):
+    def __init__(self, uri, aid, sid, fav):
+        self._track = trax.Track(uri)
+        self._sid = sid
+        self._aid = aid
+        self._fav = fav
 
-name = _('Douban.fm')
-basedir = os.path.dirname(os.path.realpath(__file__))
-ui = os.path.join(basedir, 'dbfm_pref.ui')
+        self.bind_douban_tags(self._track, aid, sid, fav)
 
-class UsernamePreference(widgets.Preference):
-    default = ''
-    name = 'plugin/douban_radio/username'
+    @classmethod
+    def is_douban_track(self, track):
+        return track.get_tag_raw('_DoubanFM_') is not None
 
-class PasswordPreference(widgets.Preference):
-    default = ''
-    name = 'plugin/douban_radio/password'
+    @property
+    def sid(self):
+        return self._sid
 
+    @property
+    def aid(self):
+        return self._aid
+
+    @property
+    def fav(self):
+        return self._fav
+
+    @property
+    def track(self):
+        return self._track
+
+    def bind_douban_tags(self, track, aid, sid, fav):
+        self._track.set_tag_raw('aid', aid)
+        self._track.set_tag_raw('sid', sid)
+        self._track.set_tag_raw('fav', fav)
+        self._track.set_tag_raw('_DoubanFM_', True)
+
+    def set_tag_raw(self, name, value):
+        self._track.set_tag_raw(name, value)
+
+    def get_tag_raw(self, name):
+        self._track.get_tag_raw(name)
+ 
