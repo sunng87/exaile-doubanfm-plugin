@@ -50,7 +50,6 @@ class DoubanFM(object):
         self.bid = None
         self._channel = 0
         self.__login(username, password)
-        pass
     
     @property
     def channel(self):
@@ -79,7 +78,7 @@ class DoubanFM(object):
             resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
 
             if not resultCookie.has_key('dbcl2'):
-                raise LoginException()
+                raise DoubanLoginException()
 
             dbcl2 = resultCookie['dbcl2'].value
             if dbcl2 is not None and len(dbcl2) > 0:
@@ -231,7 +230,7 @@ class DoubanFM(object):
             
     def __parse_ck(self, content):
         """parse ck from recommend form"""
-        prog = re.compile('name=\\\\"ck\\\\" value=\\\\"(.*?)\\\\"')
+        prog = re.compile('name=\\\\"ck\\\\" value=\\\\"([\w\d]*?)\\\\"')
         finder = prog.search(content)
         if finder:
             return finder.group(1)
