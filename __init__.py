@@ -177,7 +177,7 @@ class DoubanRadioPlugin(object):
         pl = self.get_current_playlist()
         total = len(pl.get_tracks())
         cursor = pl.get_current_pos()
-        return total-cursor
+        return total-cursor-1
 
     def get_current_track(self):
         pl = self.get_current_playlist()
@@ -218,7 +218,9 @@ class DoubanRadioPlugin(object):
         playlist = self.get_current_playlist()
         if isinstance(playlist, DoubanFMPlaylist):
             ## check if last one
-            if playlist.index(track) == len(playlist.get_tracks())-1:
+            ## playlist.index(track), len(playlist.get_tracks())
+            print self.get_tracks_remain()
+            if self.get_tracks_remain() <= 1:
                 self.load_more(playlist)
 
     def get_history_sids(self, playlist):

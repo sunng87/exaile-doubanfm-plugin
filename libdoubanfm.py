@@ -34,29 +34,40 @@ import random
 import contextlib
 from Cookie import SimpleCookie
 
-__all__ = ['DoubanFM', 'LoginException', 'DoubanFMChannels']
+__all__ = ['DoubanFM', 'DoubanLoginException', 'DoubanFMChannels']
 
-class LoginException(Exception):
+class DoubanLoginException(Exception):
     pass
 
 class DoubanFM(object):
     def __init__ (self, username, password):
+        """Initialize a douban.fm session.
+        * username - the user's email on douban.com
+        * password - the user's password on douban.com
+        """
         self.uid = None
         self.dbcl2 = None
         self.bid = None
         self._channel = 0
-        self.__login__(username, password)
+        self.__login(username, password)
         pass
     
     @property
     def channel(self):
+        """ current channel """
         return self._channel
 
     @channel.setter
     def channel(self, value):
+        """ setter for current channel 
+        * value - channel id, **not channel name**
+        """
         self._channel = value
 
-    def __login__(self, username, password):
+    def __login(self, username, password):
+        """
+        login douban, get the session token
+        """
         data = urllib.urlencode({
                 'form_email':username, 'form_password':password})
         contentType = "application/x-www-form-urlencoded"
@@ -80,7 +91,10 @@ class DoubanFM(object):
             bid = resultCookie['bid'].value
             self.bid = bid
     
-    def __format_list__(self, sidlist, verb=None):
+    def __format_list(self, sidlist, verb=None):
+        """
+        for sidlist with ite verb status
+        """
         if sidlist is None or len(sidlist) == 0:
             return ''
         else:
@@ -88,17 +102,11 @@ class DoubanFM(object):
                 return ''.join(map(lambda s: '|'+str(s)+':'+str(verb), sidlist))
             else:
                 return ''.join(map(lambda s: '|'+str(s), sidlist))
-                
-
-    def new_playlist(self, history=[]):
-        params = self.__get_default_params__('n')
-        params['h'] = self.__format_list__(history, True)
-
-        results = self.__remote_fm__(params)
-
-        return json.loads(results)['song']
-    
-    def __get_default_params__ (self, typename=None):
+   
+    def __get_default_params (self, typename=None):
+        """
+        default request parameters, for override
+        """
         params = {}
         for i in ['aid', 'channel', 'du', 'h', 'r', 'rest', 'sid', 'type', 'uid']:
             params[i] = ''
@@ -112,8 +120,10 @@ class DoubanFM(object):
 
         return params
 
-    
-    def __remote_fm__(self, params):
+    def __remote_fm(self, params):
+        """
+        io with douban.fm
+        """
         data = urllib.urlencode(params)
         cookie = 'dbcl2="%s"; bid="%s"' % (self.dbcl2, self.bid)
         header = {"Cookie": cookie}
@@ -122,8 +132,104 @@ class DoubanFM(object):
             result = conn.getresponse().read()
 
             return result
+
+### playlist related
             
-    def _parse_ck(self, content):
+    def new_playlist(self, history=[]):
+        """
+        retrieve a new playlist
+        * history -  history song ids. optional.
+        """
+        params = self.__get_default_params('n')
+        params['h'] = self.__format_list(history, True)
+
+        results = self.__remote_fm(params)
+
+        return json.loads(results)['song']
+                
+    def del_song(self, sid, aid, rest=[]):
+        """
+        delete a song from your playlist
+        * sid - song id
+        * aid - album id
+        * rest - rest song ids in current playlist
+        """
+        params = self.__get_default_params('b')
+        params['sid'] = sid
+        params['aid'] = aid
+        params['rest'] = self.__format_list(rest)
+
+        result = self.__remote_fm(params)
+        return json.loads(result)['song']
+
+    def fav_song(self, sid, aid):
+        """
+        mark a song as favorite
+        * sid - song id
+        * aid - album id
+        """
+        params = self.__get_default_params('r')
+        params['sid'] = sid
+        params['aid'] = aid
+
+        self.__remote_fm(params)
+        ## ignore the response
+
+    def unfav_song(self, sid, aid):
+        """
+        unmark a favorite song
+        * sid - song id
+        * aid - album id
+        """
+        params = self.__get_default_params('u')
+        params['sid'] = sid
+        params['aid'] = aid
+
+        self.__remote_fm(params)
+
+    def skip_song(self, sid, aid, history=[]):
+        """
+        skip a song, tell douban that you have skipped the song.
+        * sid - song id
+        * aid - album id
+        * history - your playlist history(played songs and skipped songs)
+        """
+        params = self.__get_default_params('s')
+        params['h'] = self.__format_list(history[:50])
+        params['sid'] = sid
+        params['aid'] = aid
+    
+        result = self.__remote_fm(params)
+        return json.loads(result)['song']
+
+    def played_song(self, sid, aid, du=0):
+        """
+        tell douban that you have finished a song
+        * sid - song id
+        * aid - album id
+        * du - time your have been idle
+        """
+        params  = self.__get_default_params('e')
+        params['sid'] = sid
+        params['aid'] = aid
+        params['du'] = du
+
+        self.__remote_fm(params)
+
+    def played_list(self, history=[]):
+        """
+        request more playlist items
+        * history - your playlist history(played songs and skipped songs)
+        """
+        params = self.__get_default_params('p')
+        params['h'] = self.__format_list(history[:50])
+        
+        results = self.__remote_fm(params)
+        return json.loads(results)['song']
+
+#### recommand related
+            
+    def __parse_ck(self, content):
         """parse ck from recommend form"""
         prog = re.compile('name=\\\\"ck\\\\" value=\\\\"(.*?)\\\\"')
         finder = prog.search(content)
@@ -142,7 +248,7 @@ class DoubanFM(object):
                 cookie =  'dbcl2="%s"; bid="%s"; ' % (self.dbcl2, self.bid)
                 conn.request('GET', url, None, {'Cookie': cookie})
                 result = conn.getresponse().read()
-                ck = self._parse_ck(result)
+                ck = self.__parse_ck(result)
                 
         if ck:
             post = {'ck':ck, 'comment':comment, 'novote':1, 'type':'W', 'uid':uid}
@@ -159,54 +265,6 @@ class DoubanFM(object):
             with contextlib.closing(httplib.HTTPConnection("music.douban.com")) as conn:
                 conn.request('POST', "/j/recommend", data, header)
                 conn.getresponse().read()
-                
-    def del_song(self, sid, aid, rest=[]):
-        params = self.__get_default_params__('b')
-        params['sid'] = sid
-        params['aid'] = aid
-        params['rest'] = self.__format_list__(rest)
-
-        result = self.__remote_fm__(params)
-        return json.loads(result)['song']
-
-    def fav_song(self, sid, aid):
-        params = self.__get_default_params__('r')
-        params['sid'] = sid
-        params['aid'] = aid
-
-        self.__remote_fm__(params)
-        ## ignore the response
-
-    def unfav_song(self, sid, aid):
-        params = self.__get_default_params__('u')
-        params['sid'] = sid
-        params['aid'] = aid
-
-        self.__remote_fm__(params)
-
-    def skip_song(self, sid, aid, history=[]):
-        params = self.__get_default_params__('s')
-        params['h'] = self.__format_list__(history[:50])
-        params['sid'] = sid
-        params['aid'] = aid
-    
-        result = self.__remote_fm__(params)
-        return json.loads(result)['song']
-
-    def played_song(self, sid, aid, du=0):
-        params  = self.__get_default_params__('e')
-        params['sid'] = sid
-        params['aid'] = aid
-        params['du'] = du
-
-        self.__remote_fm__(params)
-
-    def played_list(self, history=[]):
-        params = self.__get_default_params__('p')
-        params['h'] = self.__format_list__(history[:50])
-        
-        results = self.__remote_fm__(params)
-        return json.loads(results)['song']
 
 DoubanFMChannels = {'Personalized':0, 'Mandarin':1, 'Western':2, 
             'Cantonese': 6, '70s': 3, '80s': 4, '90s': 5, 'NewAge':9, 
