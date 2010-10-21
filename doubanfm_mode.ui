@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
@@ -20,9 +20,6 @@
                 <property name="width_request">100</property>
                 <property name="height_request">100</property>
                 <property name="visible">True</property>
-                <child>
-                  <placeholder/>
-                </child>
               </object>
             </child>
           </object>
@@ -172,109 +169,31 @@
                   </packing>
                 </child>
                 <child>
-                  <!-- object class="GtkToggleButton" id="volume_mute_button">
+                  <object class="GtkButton" id="button1">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="focus_on_click">False</property>
+                    <signal name="button_press_event" handler="on_menu_toggle"/>
                     <child>
                       <object class="GtkImage" id="image5">
                         <property name="visible">True</property>
-                        <property name="icon_name">audio-volume-muted</property>
+                        <property name="stock">gtk-properties</property>
                       </object>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHScale" id="volume_scale">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="adjustment">volume-slider-adjustment</property>
-                    <property name="draw_value">False</property>
-                    <signal name="value_changed" handler="on_volume_slider_value_changed"/>
-                  </object>
-                  <packing>
-                    <property name="position">5</property>
-                  </packing-->
-                  <placeholder />
+                  <placeholder/>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkExpander" id="expander1">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <child>
-                  <object class="GtkHBox" id="hbox3">
-                    <property name="visible">True</property>
-                    <property name="spacing">5</property>
-                    <child>
-                      <object class="GtkButton" id="button_report">
-                        <property name="label" translatable="yes">Report Error</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="image">image8</property>
-                        <signal name="clicked" handler="on_button_report_clicked"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="button_album">
-                        <property name="label" translatable="yes">Album Page</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="receives_default">True</property>
-                        <property name="image">image7</property>
-                        <signal name="clicked" handler="on_button_album_clicked"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="button_setting">
-                        <property name="label" translatable="yes">DoubanFM Settings</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="image">image6</property>
-                        <property name="focus_on_click">False</property>
-                        <signal name="clicked" handler="on_button_setting_clicked"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="label1">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">More</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -290,17 +209,31 @@
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">0.20000000000000001</property>
   </object>
-  <object class="GtkImage" id="image6">
+  <object class="GtkMenu" id="moremenu">
     <property name="visible">True</property>
-    <property name="icon_name">preferences-other</property>
+    <child>
+      <object class="GtkMenuItem" id="menuitem1">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Report Error</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_item_report_clicked"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem2">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Album Page</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_item_album_clicked"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem3">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">DoubanFM Settings</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="on_item_setting_clicked"/>
+      </object>
+    </child>
   </object>
-  <object class="GtkImage" id="image7">
-    <property name="visible">True</property>
-    <property name="icon_name">go-jump</property>
-  </object>  
-  <object class="GtkImage" id="image8">
-    <property name="visible">True</property>
-    <property name="icon_name">go-jump</property>
-  </object>
-
 </interface>

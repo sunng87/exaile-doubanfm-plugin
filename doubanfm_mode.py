@@ -56,9 +56,10 @@ class DoubanFMMode():
             'on_skip_button_clicked': self.on_skip_button_clicked,
             'on_delete_button_clicked': self.on_delete_button_clicked,
             'on_go_home_button_clicked': self.on_go_home_button_clicked,
-            'on_button_setting_clicked': self.on_button_setting_clicked,
-            'on_button_album_clicked': self.on_button_album_clicked,
-            'on_button_report_clicked': self.on_button_report_clicked
+            'on_item_setting_clicked': self.on_button_setting_clicked,
+            'on_item_album_clicked': self.on_button_album_clicked,
+            'on_item_report_clicked': self.on_button_report_clicked,
+            'on_menu_toggle': self.on_menu_toggle,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -83,6 +84,8 @@ class DoubanFMMode():
 
         self.bookmark_button = self.builder.get_object('bookmark_button')
         self.trash_button = self.builder.get_object('delete_button')
+
+        self.popup_menu = self.builder.get_object('moremenu')
 
         progress_box = self.builder.get_object('playback_progressbar')
         self.progress_bar = PlaybackProgressBar(
@@ -199,7 +202,8 @@ class DoubanFMMode():
         self.track_title_label.set_label("%s - %s" %(title, artist))
         self.track_info_label.set_label(album)
         
-        if track.get_rating() == 5:
+        print track.get_tag_raw('fav')
+        if track.get_tag_raw('fav')[0] == "1":
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
         else:
@@ -216,15 +220,15 @@ class DoubanFMMode():
     def on_button_album_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
         if track is not None:
-            aid = track.aid
+            aid = track.get_tag_raw('aid')[0]
             url = "http://music.douban.com/subject/%s/" % aid
             os.popen(' '.join(['xdg-open', url]))
 
     def on_button_report_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
         if track is not None:
-            aid = track.aid
-            sid = track.sid
+            aid = track.get_tag_raw('aid')[0]
+            sid = track.get_tag_raw('sid')[0]
             url = "http://music.douban.com/subject/%s/report?song_id=%s" % (aid, sid)
             os.popen(' '.join(['xdg-open', url]))
 
@@ -232,5 +236,9 @@ class DoubanFMMode():
         self.window.destroy()
         event.remove_callback(self.on_playback_start, 'playback_track_start')
         self.exaile.gui.main.disconnect(self._toggle_id)
+
+    def on_menu_toggle(self, widget, e):
+        self.popup_menu.popup(None, None, None, e.button, e.time)
+        return True
 
 
