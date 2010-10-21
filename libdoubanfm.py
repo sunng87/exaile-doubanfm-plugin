@@ -171,6 +171,7 @@ class DoubanFM(object):
         return json.loads(results)['song']
 
 DoubanFMChannels = {'Personalized':0, 'Mandarin':1, 'Western':2, 
-            'Cantonese': 6, '70s': 3, '80s': 4, '90s': 5}
+            'Cantonese': 6, '70s': 3, '80s': 4, '90s': 5, 'NewAge':9, 
+            'Rock': 7, 'Fork': 8}
 
 

@@ -28,6 +28,7 @@
 import gtk
 import gtk.glade
 import pango
+import cairo
 import os
 
 from xl import xdg, event, settings
@@ -92,6 +93,45 @@ class DoubanFMMode():
 
         event.add_callback(self.on_playback_start, 'playback_track_start', self.exaile.player)
         self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
+
+        ## added for 0.3.2
+        self._init_alpha()
+
+    def _init_alpha(self):
+        if settings.get_option('gui/use_alpha', False):
+            screen = self.window.get_screen()
+            colormap = screen.get_rgba_colormap()
+
+            if colormap is not None:
+                self.window.set_app_paintable(True)
+                self.window.set_colormap(colormap)
+
+                self.window.connect('expose-event', self.on_expose_event)
+                self.window.connect('screen-changed', self.on_screen_changed)
+
+    def on_expose_event(self, widget, event):
+        """
+            Paints the window alpha transparency
+        """
+        opacity = 1 - settings.get_option('gui/transparency', 0.3)
+        context = widget.window.cairo_create()
+        background = widget.style.bg[gtk.STATE_NORMAL]
+        context.set_source_rgba(
+            float(background.red) / 256**2,
+            float(background.green) / 256**2,
+            float(background.blue) / 256**2,
+            opacity
+        )
+        context.set_operator(cairo.OPERATOR_SOURCE)
+        context.paint()
+
+    def on_screen_changed(self, widget, event):
+        """
+            Updates the colormap on screen change
+        """
+        screen = widget.get_screen()
+        colormap = screen.get_rgba_colormap() or screen.get_rgb_colormap()
+        self.window.set_colormap(rgbamap)
 
     def toggle_visible(self, *e):
         if not self.active:
