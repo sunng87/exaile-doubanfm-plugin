@@ -106,8 +106,8 @@ class DoubanRadioPlugin(object):
         ## play next song
         self.exaile.gui.main.queue.next()
 
-        sid = track.get_tag_raw('sid')
-        aid = track.get_tag_raw('aid')
+        sid = track.get_tag_raw('sid')[0]
+        aid = track.get_tag_raw('aid')[0]
         songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
         
         self.load_more_tracks(songs)
@@ -129,16 +129,18 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def mark_as_like(self, track):
-        sid = track.get_tag_raw('sid')
-        aid = track.get_tag_raw('aid')
+        sid = track.get_tag_raw('sid')[0]
+        aid = track.get_tag_raw('aid')[0]
         self.doubanfm.fav_song(sid, aid)
+        track.set_tag_raw('fav', '1')
 
     @common.threaded
     def mark_as_dislike(self, track):
-        sid = track.get_tag_raw('sid')
-        aid = track.get_tag_raw('aid')
+        sid = track.get_tag_raw('sid')[0]
+        aid = track.get_tag_raw('aid')[0]
 
         self.doubanfm.unfav_song(sid, aid)
+        track.set_tag_raw('fav', '0')
 
     @common.threaded
     def mark_as_recycle(self, track):
@@ -153,8 +155,8 @@ class DoubanRadioPlugin(object):
         ## remove the track
         self.remove_current_track()
 
-        sid = track.get_tag_raw('sid')
-        aid = track.get_tag_raw('aid')
+        sid = track.get_tag_raw('sid')[0]
+        aid = track.get_tag_raw('aid')[0]
         songs = self.doubanfm.del_song(sid, aid, rest=rest_sids)
 
         self.load_more_tracks(songs)
@@ -184,7 +186,7 @@ class DoubanRadioPlugin(object):
         self.exaile.gui.main.get_current_playlist().remove_selected_tracks()
 
     def tracks_to_sids(self, tracks):
-        return map(lambda t: t.get_tag_raw('sid'), tracks)
+        return map(lambda t: t.get_tag_raw('sid')[0], tracks)
 
     @common.threaded
     def play_feedback(self, type, player, current_track):
@@ -193,8 +195,8 @@ class DoubanRadioPlugin(object):
                 self.skipped = False
                 return
             track = current_track
-            sid = track.get_tag_raw('sid')
-            aid = track.get_tag_raw('aid')
+            sid = track.get_tag_raw('sid')[0]
+            aid = track.get_tag_raw('aid')[0]
             if sid is not None and aid is not None:
                 self.doubanfm.played_song(sid, aid)
 
