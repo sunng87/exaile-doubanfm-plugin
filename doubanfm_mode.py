@@ -82,6 +82,7 @@ class DoubanFMMode():
         self.track_info_label = self.builder.get_object('track_info_label')
 
         self.bookmark_button = self.builder.get_object('bookmark_button')
+        self.trash_button = self.builder.get_object('delete_button')
 
         progress_box = self.builder.get_object('playback_progressbar')
         self.progress_bar = PlaybackProgressBar(
@@ -204,6 +205,10 @@ class DoubanFMMode():
         else:
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
+
+        ## recent change from official client, you can only trash 
+        ## song in personal channel
+        self.trash_button.set_sensitive(self.dbfm_plugin.get_current_channel() == 0)
 
     def on_button_setting_clicked(self, *e):
         os.popen(' '.join(['xdg-open', 'http://douban.fm/mine']))	

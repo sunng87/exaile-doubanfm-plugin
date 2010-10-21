@@ -168,13 +168,13 @@ class DoubanRadioPlugin(object):
         return rest_sids
 
     def get_tracks_remain(self):
-        pl = self.exaile.gui.main.get_current_playlist().playlist
+        pl = self.get_current_playlist()
         total = len(pl.get_tracks())
         cursor = pl.get_current_pos()
         return total-cursor
 
     def get_current_track(self):
-        pl = self.exaile.gui.main.get_current_playlist().playlist
+        pl = self.get_current_playlist()
         if isinstance(pl, DoubanFMPlaylist):
 	        return pl.get_tracks()[pl.get_current_pos()]
         else:
@@ -281,9 +281,9 @@ class DoubanRadioPlugin(object):
     def show_mode(self, *e):
         self.doubanfm_mode.show()
 
-    def create_playlist(self, name, initial_tracks=[]):
+    def create_playlist(self, name, channel, initial_tracks=[]):
         ## to update in 0.3.2 
-        plist = DoubanFMPlaylist(name)
+        plist = DoubanFMPlaylist(name, channel)
         plist.set_ordered_tracks(initial_tracks)
 
         plist.set_repeat(False)
@@ -291,6 +291,9 @@ class DoubanRadioPlugin(object):
         plist.set_dynamic(False)
 
         return plist
+
+    def get_current_channel(self):
+        return self.get_current_playlist().channel
 
     def active_douban_radio(self, type, channel_name):
         channel_id = self.channels[channel_name]    
@@ -308,7 +311,7 @@ class DoubanRadioPlugin(object):
 
         tracks = map(self.create_track_from_douban_song, songs)
         plist = self.create_playlist(
-                _('DoubanFM')+" "+channel_name, tracks)
+                _('DoubanFM')+" "+channel_name, channel_id, tracks)
         
         self.exaile.gui.main.add_playlist(plist)
 #       self.play(plist)
@@ -316,18 +319,20 @@ class DoubanRadioPlugin(object):
 #       self.doubanfm_mode.show()
 
     def destroy(self, exaile):
-        if self.menuItem :
-            exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
-        if self.modeMenuItem:
-            exaile.gui.builder.get_object('view_menu').remove(self.modeMenuItem)
-            exaile.gui.main.remove_accel_group(self.accels)
-        self.__unregister_events()
+        try:
+            if self.menuItem :
+                exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
+            if self.modeMenuItem:
+                exaile.gui.builder.get_object('view_menu').remove(self.modeMenuItem)
+                exaile.gui.main.remove_accel_group(self.accels)
+            self.__unregister_events()
 
-        self.doubanfm_mode.destroy()
-        pass
+            self.doubanfm_mode.destroy()
+        except:
+            pass
        
 class DoubanFMPlaylist(playlist.Playlist):
-    def __init__(self, name):
+    def __init__(self, name, channel):
         playlist.Playlist.__init__(self, name)
-        pass
+        self.channel = channel
        
