@@ -65,5 +65,5 @@ class DoubanFMTrack(object):
         self._track.set_tag_raw(name, value)
 
     def get_tag_raw(self, name):
-        self._track.get_tag_raw(name)
+        self._track.get_tag_raw(name)[0]
  
