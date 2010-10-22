@@ -4,6 +4,7 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="doubanfm_mode_window">
     <property name="width_request">400</property>
+    <property name="border_width">3</property>
     <property name="title" translatable="yes">Exaile Doubanfm</property>
     <child>
       <object class="GtkHBox" id="hbox1">
