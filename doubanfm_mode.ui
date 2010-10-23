@@ -96,6 +96,7 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Fav / Unfav</property>
                     <property name="focus_on_click">False</property>
+                    <accelerator key="f" signal="activate"/>
                     <signal name="clicked" handler="on_bookmark_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image1">
@@ -116,6 +117,7 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Skip</property>
                     <property name="focus_on_click">False</property>
+                    <accelerator key="s" signal="activate"/>
                     <signal name="clicked" handler="on_skip_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image2">
@@ -136,6 +138,7 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Delete</property>
                     <property name="focus_on_click">False</property>
+                    <accelerator key="d" signal="activate"/>
                     <signal name="clicked" handler="on_delete_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image3">
