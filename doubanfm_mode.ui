@@ -6,6 +6,7 @@
     <property name="width_request">400</property>
     <property name="border_width">3</property>
     <property name="title" translatable="yes">Exaile Doubanfm</property>
+    <property name="window_position">center</property>
     <child>
       <object class="GtkHBox" id="hbox1">
         <property name="visible">True</property>
