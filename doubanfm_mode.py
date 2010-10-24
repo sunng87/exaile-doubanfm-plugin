@@ -35,6 +35,7 @@ from xl import xdg, event, settings
 from xlgui import cover, guiutil, tray
 from xlgui.main import PlaybackProgressBar
 from xlgui.widgets import info
+from xl.nls import gettext as _
 
 from doubanfm_track import DoubanFMTrack
 
@@ -60,6 +61,7 @@ class DoubanFMMode():
             'on_item_album_clicked': self.on_button_album_clicked,
             'on_item_report_clicked': self.on_button_report_clicked,
             'on_menu_toggle': self.on_menu_toggle,
+            'on_quit': self.on_quit,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -84,8 +86,12 @@ class DoubanFMMode():
 
         self.bookmark_button = self.builder.get_object('bookmark_button')
         self.trash_button = self.builder.get_object('delete_button')
+        self.skip_button = self.builder.get_object('skip_button')
 
         self.popup_menu = self.builder.get_object('moremenu')
+
+        self.report_menuitem = self.builder.get_object('menuitem1')
+        self.album_menuitem = self.builder.get_object('menuitem2')
 
         progress_box = self.builder.get_object('playback_progressbar')
         self.progress_bar = PlaybackProgressBar(
@@ -95,11 +101,29 @@ class DoubanFMMode():
         self.visible = False
         self.active = False
 
+        self._build_channel_menu()
+
         event.add_callback(self.on_playback_start, 'playback_track_start', self.exaile.player)
+        event.add_callback(self.on_playback_stop, 'playback_track_end', self.exaile.player)
         self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
 
         ## added for 0.3.2
         self._init_alpha()
+
+    def _build_channel_menu(self):
+        menu = self.builder.get_object('channel_menu')
+
+        group = None
+
+        for channel_name in self.dbfm_plugin.channels.keys():
+            menuItem = gtk.RadioMenuItem(group, _(channel_name))
+            group = group or menuItem
+
+            menuItem.connect('toggled', self.on_channel_group_change,
+                    self.dbfm_plugin.channels[channel_name])
+            
+            menu.prepend(menuItem)
+            menuItem.show()
 
     def _init_alpha(self):
         if settings.get_option('gui/use_alpha', False):
@@ -211,7 +235,20 @@ class DoubanFMMode():
 
         ## recent change from official client, you can only trash 
         ## song in personal channel
+        self.skip_button.set_sensitive(True)
+        self.bookmark_button.set_sensitive(True)
         self.trash_button.set_sensitive(self.dbfm_plugin.get_current_channel() == 0)
+
+        self.report_menuitem.set_sensitive(True)
+        self.album_menuitem.set_sensitive(True)
+
+    def on_playback_stop(self, type, player, data):
+        self.skip_button.set_sensitive(False)
+        self.bookmark_button.set_sensitive(False)
+        self.trash_button.set_sensitive(False)
+        
+        self.report_menuitem.set_sensitive(False)
+        self.album_menuitem.set_sensitive(False)
 
     def on_button_setting_clicked(self, *e):
         os.popen(' '.join(['xdg-open', 'http://douban.fm/mine']))	
@@ -234,10 +271,21 @@ class DoubanFMMode():
     def destroy(self):
         self.window.destroy()
         event.remove_callback(self.on_playback_start, 'playback_track_start')
+        event.add_callback(self.on_playback_stop, 'playback_track_end', self.exaile.player)
         self.exaile.gui.main.disconnect(self._toggle_id)
 
     def on_menu_toggle(self, widget, e):
         self.popup_menu.popup(None, None, None, e.button, e.time)
         return True
 
+    def on_quit(self, *e):
+        self.exaile.gui.main.quit()
+
+    def on_channel_group_change(self, item, data):
+        channel_id = data
+
+        self.dbfm_plugin.close_playlist(None, self.exaile, None)
+        self.dbfm_plugin.active_douban_radio(None, channel_id, True)
+
+        self.show()
 

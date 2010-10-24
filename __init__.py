@@ -249,7 +249,7 @@ class DoubanRadioPlugin(object):
         for channel_name  in self.channels.keys():
             menuItem = gtk.MenuItem(_(channel_name))
 
-            menuItem.connect('activate', self.active_douban_radio, channel_name)
+            menuItem.connect('activate', self.active_douban_radio, self.channels[channel_name])
             
             menu.prepend(menuItem)
             menuItem.show()
@@ -284,7 +284,6 @@ class DoubanRadioPlugin(object):
         self.doubanfm_mode.show()
 
     def create_playlist(self, name, channel, initial_tracks=[]):
-        ## to update in 0.3.2 
         plist = DoubanFMPlaylist(name, channel)
         plist.set_ordered_tracks(initial_tracks)
 
@@ -297,9 +296,7 @@ class DoubanRadioPlugin(object):
     def get_current_channel(self):
         return self.get_current_playlist().channel
 
-    def active_douban_radio(self, type, channel_name):
-        channel_id = self.channels[channel_name]    
-
+    def active_douban_radio(self, type, channel_id, auto=False):
         self.doubanfm.channel = channel_id
         try:
             songs = self.doubanfm.new_playlist()
@@ -313,12 +310,27 @@ class DoubanRadioPlugin(object):
 
         tracks = map(self.create_track_from_douban_song, songs)
         plist = self.create_playlist(
-                _('DoubanFM')+" "+channel_name, channel_id, tracks)
+                _('DoubanFM'), channel_id, tracks)
         
         self.exaile.gui.main.add_playlist(plist)
-#       self.play(plist)
 
-#       self.doubanfm_mode.show()
+        if auto: 
+            self._stop()
+            self._play()
+
+    def _stop(self):
+        self.exaile.player.stop()
+
+    def _play(self):
+        ## ref xlgui.main.on_playpause_button_clicked
+        guimain = self.exaile.gui.main
+        pl = guimain.get_selected_playlist()
+        guimain.queue.set_current_playlist(pl.playlist)
+        if pl:
+            track = pl.get_selected_track()
+            if track:
+                pl.playlist.set_current_pos((pl.playlist.index(track)))
+        guimain.queue.play()
 
     def destroy(self, exaile):
         try:
