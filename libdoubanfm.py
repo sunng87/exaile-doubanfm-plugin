@@ -230,7 +230,7 @@ class DoubanFM(object):
             
     def __parse_ck(self, content):
         """parse ck from recommend form"""
-        prog = re.compile('name=\\\\"ck\\\\" value=\\\\"([\w\d]*?)\\\\"')
+        prog = re.compile(r'name=\\"ck\\" value=\\"([\w\d]*?)\\"')
         finder = prog.search(content)
         if finder:
             return finder.group(1)
