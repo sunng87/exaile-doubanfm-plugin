@@ -65,7 +65,7 @@ class DoubanFMMode():
             'on_item_report_clicked': self.on_button_report_clicked,
             'on_menu_toggle': self.on_menu_toggle,
             'on_quit': self.on_quit,
-            'on_recommand': self.on_recommand,
+            'on_recommend': self.on_recommend,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -291,26 +291,20 @@ class DoubanFMMode():
     def on_quit(self, *e):
         self.exaile.gui.main.quit()
 
-    def on_recommand(self, *e):
+    def on_recommend(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        recommand_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
-        recommand_tpl = Template(recommand_tpl)
+        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
+        recommend_tpl = Template(recommend_tpl)
 
         artist = track.get_tag_raw('artist')[0]
         album = track.get_tag_raw('album')[0]
         title = track.get_tag_raw('title')[0]
 
         data = dict(title=title, album=album, artist=artist)
-        recommand_words = recommand_tpl.safe_substitute(**data)
+        recommend_words = recommend_tpl.safe_substitute(**data)
 
         aid = track.get_tag_raw('aid')[0]
-        u = "http://music.douban.com/subject/%s/" % aid
-        t = artist +": "+ album +" - "+ title
-        r = recommand_words
-
-        rcmurl = "http://www.douban.com/recommend/?url={0}&title={1}&v=1&comment={2}"
-        rcmurl = '"'+rcmurl.format(*map(lambda x:urllib.quote(str(x)), [u, t, r]))+'"'
-        os.popen(' '.join(['xdg-open', rcmurl]))
+        self.dbfm_plugin.recommend(aid, recommend_words)
         
     def on_channel_group_change(self, item, data):
         channel_id = data

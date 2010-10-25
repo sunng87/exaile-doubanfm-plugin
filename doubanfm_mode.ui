@@ -162,8 +162,8 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Switch to nornal mode</property>
                     <property name="focus_on_click">False</property>
-                    <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
                     <accelerator key="g" signal="activate"/>
+                    <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
                     <signal name="clicked" handler="on_go_home_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image4">
@@ -227,16 +227,17 @@
         <property name="sensitive">False</property>
         <property name="image">image9</property>
         <property name="use_stock">False</property>
+        <signal name="activate" handler="on_item_album_clicked"/>
       </object>
     </child>
     <child>
       <object class="GtkImageMenuItem" id="menuitem8">
-        <property name="label" translatable="yes">Recommand</property>
+        <property name="label" translatable="yes">Recommend</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
         <property name="image">image11</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_recommand"/>
+        <signal name="activate" handler="on_recommend"/>
       </object>
     </child>
     <child>
@@ -246,6 +247,7 @@
         <property name="sensitive">False</property>
         <property name="image">image8</property>
         <property name="use_stock">False</property>
+        <signal name="activate" handler="on_item_report_clicked"/>
       </object>
     </child>
     <child>

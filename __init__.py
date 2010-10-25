@@ -168,6 +168,10 @@ class DoubanRadioPlugin(object):
         rest_tracks = current_tracks[playlist.get_current_pos()+1:]
         rest_sids = self.tracks_to_sids(rest_tracks)
         return rest_sids
+        
+    @common.threaded
+    def recommend(self, uid, comment):
+        self.doubanfm.recommend(uid, comment)
 
     def get_tracks_remain(self):
         pl = self.get_current_playlist()

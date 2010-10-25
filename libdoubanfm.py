@@ -1,3 +1,4 @@
+# -*- coding: UTF8 -*-
 # Copyright (C) 2008-2010 Sun Ning <classicning@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -121,7 +122,44 @@ class DoubanFM(object):
             result = conn.getresponse().read()
 
             return result
-
+            
+    def _parse_ck(self, content):
+        """parse ck from recommend form"""
+        prog = re.compile('name=\\\\"ck\\\\" value=\\\\"(.*?)\\\\"')
+        finder = prog.search(content)
+        if finder:
+            return finder.group(1)
+        return None
+            
+    def recommend(self, uid, comment, ck=None):
+        """recommend a uid with some comment. ck is optional, if
+        not provided, we will try to fetch a ck."""
+        
+        if ck is None:
+        ## get recommend ck
+            url = "http://music.douban.com/j/recommend?type=W&uid=%s&rec=" % uid
+            with contextlib.closing(httplib.HTTPConnection("music.douban.com")) as conn:
+                cookie =  'dbcl2="%s"; bid="%s"; ' % (self.dbcl2, self.bid)
+                conn.request('GET', url, None, {'Cookie': cookie})
+                result = conn.getresponse().read()
+                ck = self._parse_ck(result)
+                
+        if ck:
+            post = {'ck':ck, 'comment':comment, 'novote':1, 'type':'W', 'uid':uid}
+            
+            ## convert unicode chars to bytes
+            data = urllib.urlencode(post)
+            ## ck ?
+            cookie = 'dbcl2="%s"; bid="%s"; ck=%s' % (self.dbcl2, self.bid, ck)
+            accept = 'application/json'
+            content_type= 'application/x-www-form-urlencoded; charset=UTF-8'
+            header = {"Cookie": cookie, "Accept": accept,
+                    "Content-Type":content_type, }
+                    
+            with contextlib.closing(httplib.HTTPConnection("music.douban.com")) as conn:
+                conn.request('POST', "/j/recommend", data, header)
+                conn.getresponse().read()
+                
     def del_song(self, sid, aid, rest=[]):
         params = self.__get_default_params__('b')
         params['sid'] = sid

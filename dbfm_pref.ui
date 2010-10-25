@@ -115,7 +115,7 @@ Thanks for using douban.fm plugin on exaile. To get your personalized playlist, 
             <child>
               <object class="GtkLabel" id="label5">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Recommand Template:</property>
+                <property name="label" translatable="yes">Recommend Template:</property>
               </object>
               <packing>
                 <property name="position">0</property>
