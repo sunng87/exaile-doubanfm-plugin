@@ -41,3 +41,7 @@ class PasswordPreference(widgets.Preference):
     default = ''
     name = 'plugin/douban_radio/password'
 
+class RecommandPreference(widgets.Preference):
+    default = '$artist: $title - $album'
+    name = 'plugin/douban_radio/rcm_tpl'
+

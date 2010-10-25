@@ -31,6 +31,9 @@ import pango
 import cairo
 import os
 
+from string import Template
+import urllib
+
 from xl import xdg, event, settings
 from xlgui import cover, guiutil, tray
 from xlgui.main import PlaybackProgressBar
@@ -62,6 +65,7 @@ class DoubanFMMode():
             'on_item_report_clicked': self.on_button_report_clicked,
             'on_menu_toggle': self.on_menu_toggle,
             'on_quit': self.on_quit,
+            'on_recommand': self.on_recommand,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -92,6 +96,16 @@ class DoubanFMMode():
 
         self.report_menuitem = self.builder.get_object('menuitem1')
         self.album_menuitem = self.builder.get_object('menuitem2')
+        self.recmd_menuitem = self.builder.get_object('menuitem8')
+
+        self.sensitive_widgets = [
+            self.bookmark_button,
+            self.trash_button,
+            self.skip_button,
+            self.report_menuitem,
+            self.album_menuitem,
+            self.recmd_menuitem,
+        ]
 
         progress_box = self.builder.get_object('playback_progressbar')
         self.progress_bar = PlaybackProgressBar(
@@ -233,22 +247,18 @@ class DoubanFMMode():
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
 
+        self.sensitive(True)
+
         ## recent change from official client, you can only trash 
         ## song in personal channel
-        self.skip_button.set_sensitive(True)
-        self.bookmark_button.set_sensitive(True)
         self.trash_button.set_sensitive(self.dbfm_plugin.get_current_channel() == 0)
 
-        self.report_menuitem.set_sensitive(True)
-        self.album_menuitem.set_sensitive(True)
-
     def on_playback_stop(self, type, player, data):
-        self.skip_button.set_sensitive(False)
-        self.bookmark_button.set_sensitive(False)
-        self.trash_button.set_sensitive(False)
-        
-        self.report_menuitem.set_sensitive(False)
-        self.album_menuitem.set_sensitive(False)
+        self.sensitive(False)
+
+    def sensitive(self, enable):
+        for w in self.sensitive_widgets:
+            w.set_sensitive(enable)
 
     def on_button_setting_clicked(self, *e):
         os.popen(' '.join(['xdg-open', 'http://douban.fm/mine']))	
@@ -281,6 +291,27 @@ class DoubanFMMode():
     def on_quit(self, *e):
         self.exaile.gui.main.quit()
 
+    def on_recommand(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        recommand_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
+        recommand_tpl = Template(recommand_tpl)
+
+        artist = track.get_tag_raw('artist')[0]
+        album = track.get_tag_raw('album')[0]
+        title = track.get_tag_raw('title')[0]
+
+        data = dict(title=title, album=album, artist=artist)
+        recommand_words = recommand_tpl.safe_substitute(**data)
+
+        aid = track.get_tag_raw('aid')[0]
+        u = "http://music.douban.com/subject/%s/" % aid
+        t = artist +": "+ album +" - "+ title
+        r = recommand_words
+
+        rcmurl = "http://www.douban.com/recommend/?url={0}&title={1}&v=1&comment={2}"
+        rcmurl = '"'+rcmurl.format(*map(lambda x:urllib.quote(str(x)), [u, t, r]))+'"'
+        os.popen(' '.join(['xdg-open', rcmurl]))
+        
     def on_channel_group_change(self, item, data):
         channel_id = data
 
