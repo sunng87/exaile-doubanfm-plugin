@@ -66,6 +66,7 @@ class DoubanFMMode():
             'on_menu_toggle': self.on_menu_toggle,
             'on_quit': self.on_quit,
             'on_recommend': self.on_recommend,
+            'on_pausebutton_toggled': self.on_pausebutton_toggled,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -91,6 +92,7 @@ class DoubanFMMode():
         self.bookmark_button = self.builder.get_object('bookmark_button')
         self.trash_button = self.builder.get_object('delete_button')
         self.skip_button = self.builder.get_object('skip_button')
+        self.pause_button = self.builder.get_object('pause_button')
 
         self.popup_menu = self.builder.get_object('moremenu')
 
@@ -102,6 +104,7 @@ class DoubanFMMode():
             self.bookmark_button,
             self.trash_button,
             self.skip_button,
+            self.pause_button,
             self.report_menuitem,
             self.album_menuitem,
             self.recmd_menuitem,
@@ -313,4 +316,16 @@ class DoubanFMMode():
         self.dbfm_plugin.active_douban_radio(None, channel_id, True)
 
         self.show()
+
+    def on_pausebutton_toggled(self, btn):
+        self.exaile.player.toggle_pause()
+        if btn.get_active():
+            ## switch to play icon
+            self.pause_button.set_image(
+                    gtk.image_new_from_stock('gtk-media-play', gtk.ICON_SIZE_BUTTON))
+        else:
+            ## switch back
+            self.pause_button.set_image(
+                    gtk.image_new_from_stock('gtk-media-pause', gtk.ICON_SIZE_BUTTON))
+
 
