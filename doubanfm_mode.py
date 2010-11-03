@@ -31,7 +31,6 @@ import pango
 import cairo
 import os
 
-from string import Template
 import urllib
 
 from xl import xdg, event, settings
@@ -67,6 +66,7 @@ class DoubanFMMode():
             'on_quit': self.on_quit,
             'on_recommend': self.on_recommend,
             'on_pausebutton_toggled': self.on_pausebutton_toggled,
+            'on_recommend_song': self.on_recommend_song,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -99,6 +99,7 @@ class DoubanFMMode():
         self.report_menuitem = self.builder.get_object('menuitem1')
         self.album_menuitem = self.builder.get_object('menuitem2')
         self.recmd_menuitem = self.builder.get_object('menuitem8')
+        self.recmds_menuitem = self.builder.get_object('menuitem9')
 
         self.sensitive_widgets = [
             self.bookmark_button,
@@ -108,6 +109,7 @@ class DoubanFMMode():
             self.report_menuitem,
             self.album_menuitem,
             self.recmd_menuitem,
+            self.recmds_menuitem,
         ]
 
         progress_box = self.builder.get_object('playback_progressbar')
@@ -296,18 +298,11 @@ class DoubanFMMode():
 
     def on_recommend(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
-        recommend_tpl = Template(recommend_tpl)
+        self.dbfm_plugin.recommend(track)
 
-        artist = track.get_tag_raw('artist')[0]
-        album = track.get_tag_raw('album')[0]
-        title = track.get_tag_raw('title')[0]
-
-        data = dict(title=title, album=album, artist=artist)
-        recommend_words = recommend_tpl.safe_substitute(**data)
-
-        aid = track.get_tag_raw('aid')[0]
-        self.dbfm_plugin.recommend(aid, recommend_words)
+    def on_recommend_song(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        self.dbfm_plugin.recommend_song(track)
         
     def on_channel_group_change(self, item, data):
         channel_id = data

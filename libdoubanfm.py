@@ -236,13 +236,14 @@ class DoubanFM(object):
             return finder.group(1)
         return None
             
-    def recommend(self, uid, comment, ck=None):
+    def recommend(self, uid, comment, title=None, t=None, ck=None):
         """recommend a uid with some comment. ck is optional, if
         not provided, we will try to fetch a ck."""
         
+        t = t or 'W'
         if ck is None:
         ## get recommend ck
-            url = "http://music.douban.com/j/recommend?type=W&uid=%s&rec=" % uid
+            url = "http://www.douban.com/j/recommend?type=%s&uid=%s&rec=" % (t,uid)
             with contextlib.closing(httplib.HTTPConnection("music.douban.com")) as conn:
                 cookie =  'dbcl2="%s"; bid="%s"; ' % (self.dbcl2, self.bid)
                 conn.request('GET', url, None, {'Cookie': cookie})
@@ -250,7 +251,9 @@ class DoubanFM(object):
                 ck = self.__parse_ck(result)
                 
         if ck:
-            post = {'ck':ck, 'comment':comment, 'novote':1, 'type':'W', 'uid':uid}
+            post = {'ck':ck, 'comment':comment, 'novote':1, 'type':t, 'uid':uid}
+            if title:
+                post['title'] = title
             
             ## convert unicode chars to bytes
             data = urllib.urlencode(post)
@@ -261,7 +264,7 @@ class DoubanFM(object):
             header = {"Cookie": cookie, "Accept": accept,
                     "Content-Type":content_type, }
                     
-            with contextlib.closing(httplib.HTTPConnection("music.douban.com")) as conn:
+            with contextlib.closing(httplib.HTTPConnection("www.douban.com")) as conn:
                 conn.request('POST', "/j/recommend", data, header)
                 conn.getresponse().read()
 

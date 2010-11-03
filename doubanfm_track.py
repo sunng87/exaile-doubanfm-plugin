@@ -33,7 +33,7 @@ class DoubanFMTrack(object):
         self._aid = aid
         self._fav = fav
 
-        self.bind_douban_tags(self._track, aid, sid, fav)
+        self.bind_douban_tags(self._track, aid, sid, uri, fav)
 
     @classmethod
     def is_douban_track(self, track):
@@ -55,9 +55,10 @@ class DoubanFMTrack(object):
     def track(self):
         return self._track
 
-    def bind_douban_tags(self, track, aid, sid, fav):
+    def bind_douban_tags(self, track, aid, sid, uri, fav):
         self._track.set_tag_raw('aid', aid)
         self._track.set_tag_raw('sid', sid)
+        self._track.set_tag_raw('uri', uri)
         self._track.set_tag_raw('fav', fav or '0')
         self._track.set_tag_raw('_DoubanFM_', True)
 

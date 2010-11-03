@@ -32,6 +32,7 @@ import dbfm_pref
 
 import gtk
 import time
+from string import Template
 
 from xl import common, event, main, playlist, xdg, settings, trax
 from xl.radio import *
@@ -170,8 +171,37 @@ class DoubanRadioPlugin(object):
         return rest_sids
         
     @common.threaded
-    def recommend(self, uid, comment):
-        self.doubanfm.recommend(uid, comment)
+    def recommend(self, track):
+        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
+        recommend_tpl = Template(recommend_tpl)
+
+        artist = track.get_tag_raw('artist')[0]
+        album = track.get_tag_raw('album')[0]
+        title = track.get_tag_raw('title')[0]
+
+        data = dict(title=title, album=album, artist=artist)
+
+        recommend_words = recommend_tpl.safe_substitute(**data)
+        aid = track.get_tag_raw('aid')[0]
+
+        self.doubanfm.recommend(aid, recommend_words)
+
+    @common.threaded
+    def recommend_song(self, track):
+        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
+        recommend_tpl = Template(recommend_tpl)
+
+        artist = track.get_tag_raw('artist')[0]
+        album = track.get_tag_raw('album')[0]
+        title = track.get_tag_raw('title')[0]
+
+        data = dict(title=title, album=album, artist=artist)
+
+        recommend_words = recommend_tpl.safe_substitute(**data)
+        url = track.get_tag_raw('uri')[0]
+        t = artist + " " + title
+
+        self.doubanfm.recommend(url, recommend_words, title=t, t="I")
 
     def get_tracks_remain(self):
         pl = self.get_current_playlist()
