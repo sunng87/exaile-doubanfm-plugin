@@ -15,5 +15,9 @@ There is a minimized view for DoubanFM tracks, you can:
 
 ![DoubanFM Mode](http://farm5.static.flickr.com/4075/4760493886_5e334726cf.jpg "Douban FM Mode")
 
+Install
+-------
+[Installation Instructions](https://github.com/sunng87/exaile-doubanfm-plugin/wiki/Installation).
+
 
 
