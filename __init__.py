@@ -27,6 +27,7 @@
 from libdoubanfm import DoubanFM, DoubanFMChannels
 from doubanfm_mode import DoubanFMMode
 from doubanfm_track import DoubanFMTrack
+from doubanfm_cover import DoubanFMCover
 
 import dbfm_pref
 
@@ -34,7 +35,7 @@ import gtk
 import time
 from string import Template
 
-from xl import common, event, main, playlist, xdg, settings, trax
+from xl import common, event, main, playlist, xdg, settings, trax, providers
 from xl.radio import *
 from xl.nls import gettext as _
 from xlgui import guiutil
@@ -54,11 +55,9 @@ def _enable(device, exaile, nothing):
     password = settings.get_option("plugin/douban_radio/password")
     DOUBANFM = DoubanRadioPlugin(exaile, username, password)
 
-
 def disable(exaile):
     global DOUBANFM
     DOUBANFM.destroy(exaile)
-    pass
 
 def get_preferences_pane():
     return dbfm_pref
@@ -76,6 +75,8 @@ class DoubanRadioPlugin(object):
 
         self.__register_events()
         self.doubanfm_mode = DoubanFMMode(self.exaile, self)
+        self.doubanfm_cover = DoubanFMCover()
+        providers.register('covers', self.doubanfm_cover)
 
         ## mark if a track is skipped instead of end normally
         self.skipped = False
@@ -370,6 +371,7 @@ class DoubanRadioPlugin(object):
 
     def destroy(self, exaile):
         try:
+            providers.unregister('covers', self.doubanfm_cover)
             if self.menuItem :
                 exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
             if self.modeMenuItem:
