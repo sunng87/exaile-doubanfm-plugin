@@ -8,12 +8,14 @@ Intro
 
 There is a minimized view for DoubanFM tracks, you can:
 
-* Mark a track as favorite or not
+* Mark a track as favorite
 * Skip a track
 * Delete a track
 * Douban covers support, fast retrieve album art from Douban.com
+* Share music and album to douban.com
+* Switch between channels
 
-![DoubanFM Mode](http://farm5.static.flickr.com/4075/4760493886_5e334726cf.jpg "Douban FM Mode")
+![DoubanFM Mode](http://farm6.static.flickr.com/5047/5208490641_3fb0cf3069.jpg "Douban FM Mode")
 
 Install
 -------
