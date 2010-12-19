@@ -270,6 +270,6 @@ class DoubanFM(object):
 
 DoubanFMChannels = {'Personalized':0, 'Mandarin':1, 'Western':2, 
             'Cantonese': 6, '70s': 3, '80s': 4, '90s': 5, 'NewAge':9, 
-            'Rock': 7, 'Fork': 8}
+            'Rock': 7, 'Fork': 8, 'OST': 10}
 
 
