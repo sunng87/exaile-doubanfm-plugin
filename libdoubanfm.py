@@ -67,11 +67,15 @@ class DoubanFM(object):
         """
         login douban, get the session token
         """
-        data = urllib.urlencode({
+        data = urllib.urlencode({'source':'simple',
                 'form_email':username, 'form_password':password})
         contentType = "application/x-www-form-urlencoded"
-        headers = {"Content-Type":contentType}
-        with contextlib.closing(httplib.HTTPConnection("www.douban.com")) as conn:
+
+        self.__get_bid()
+        cookie = "bid=%s" % self.bid
+
+        headers = {"Content-Type":contentType, "Cookie": cookie }
+        with contextlib.closing(httplib.HTTPSConnection("www.douban.com")) as conn:
             conn.request("POST", "/accounts/login", data, headers)
         
             r1 = conn.getresponse()
@@ -86,10 +90,20 @@ class DoubanFM(object):
         
                 uid = self.dbcl2.split(':')[0]
                 self.uid = uid
-
-            bid = resultCookie['bid'].value
-            self.bid = bid
     
+    def __get_bid(self):
+        conn = httplib.HTTPConnection("www.douban.com")
+        conn.request("GET", "/accounts/login")
+        resp = conn.getresponse()
+        cookie = resp.getheader('Set-Cookie')
+        cookie = SimpleCookie(cookie)
+        conn.close()
+        if not cookie.has_key('bid'):
+            raise DoubanLoginException()
+        else:
+            self.bid = cookie['bid']
+            return self.bid
+
     def __format_list(self, sidlist, verb=None):
         """
         for sidlist with ite verb status
