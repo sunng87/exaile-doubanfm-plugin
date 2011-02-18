@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010 Sun Ning <classicning@gmail.com>
+# Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdoubanfm import DoubanFM, DoubanFMChannels
+from libdoubanfm import DoubanFM
 from doubanfm_mode import DoubanFMMode
 from doubanfm_track import DoubanFMTrack
 from doubanfm_cover import DoubanFMCover
@@ -68,7 +68,7 @@ class DoubanRadioPlugin(object):
     def __init__(self, exaile, username ,password):
         
         self.doubanfm = DoubanFM(username, password)
-        self.channels = DoubanRadioPlugin.__translate_channels()
+        self.channels = self.doubanfm.channels
 
         self.exaile = exaile
         self.__create_menu_item__()

@@ -1,5 +1,5 @@
 # -*- coding: UTF8 -*-
-# Copyright (C) 2008-2010 Sun Ning <classicning@gmail.com>
+# Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,6 +50,16 @@ class DoubanFM(object):
         self.bid = None
         self._channel = 0
         self.__login(username, password)
+        self.__load_channels()
+
+    def __load_channels(self):
+        f = urllib.urlopen('http://www.douban.com/j/app/radio/channels')
+        data = f.read()
+        f.close()
+        channels = json.loads(data)
+        self.channels = {}
+        for channel in channels['channels']:
+            self.channels[channel['name_en']] = channel['channel_id']
     
     @property
     def channel(self):
@@ -282,8 +292,5 @@ class DoubanFM(object):
                 conn.request('POST', "/j/recommend", data, header)
                 conn.getresponse().read()
 
-DoubanFMChannels = {'Personalized':0, 'Mandarin':1, 'Western':2, 
-            'Cantonese': 6, '70s': 3, '80s': 4, '90s': 5, 'NewAge':9, 
-            'Rock': 7, 'Folk': 8, 'OST': 10}
 
 
