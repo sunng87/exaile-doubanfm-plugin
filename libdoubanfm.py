@@ -77,11 +77,11 @@ class DoubanFM(object):
         """
         login douban, get the session token
         """
-        data = urllib.urlencode({'source':'simple',
+        self.__get_login_data()
+        data = urllib.urlencode({'source':'simple', 
                 'form_email':username, 'form_password':password})
         contentType = "application/x-www-form-urlencoded"
 
-        self.__get_bid()
         cookie = "bid=%s" % self.bid
 
         headers = {"Content-Type":contentType, "Cookie": cookie }
@@ -101,7 +101,7 @@ class DoubanFM(object):
                 uid = self.dbcl2.split(':')[0]
                 self.uid = uid
     
-    def __get_bid(self):
+    def __get_login_data(self):
         conn = httplib.HTTPConnection("www.douban.com")
         conn.request("GET", "/accounts/login")
         resp = conn.getresponse()
