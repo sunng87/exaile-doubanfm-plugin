@@ -82,7 +82,7 @@ class DoubanFM(object):
                 'form_email':username, 'form_password':password})
         contentType = "application/x-www-form-urlencoded"
 
-        cookie = "bid=%s" % self.bid
+        cookie = 'bid="%s"' % self.bid
 
         headers = {"Content-Type":contentType, "Cookie": cookie }
         with contextlib.closing(httplib.HTTPSConnection("www.douban.com")) as conn:
@@ -90,6 +90,7 @@ class DoubanFM(object):
         
             r1 = conn.getresponse()
             resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
+            print r1.read()
 
             if not resultCookie.has_key('dbcl2'):
                 raise DoubanLoginException()
@@ -103,7 +104,7 @@ class DoubanFM(object):
     
     def __get_login_data(self):
         conn = httplib.HTTPConnection("www.douban.com")
-        conn.request("GET", "/accounts/login")
+        conn.request("GET", "/")
         resp = conn.getresponse()
         cookie = resp.getheader('Set-Cookie')
         cookie = SimpleCookie(cookie)
@@ -112,6 +113,7 @@ class DoubanFM(object):
             raise DoubanLoginException()
         else:
             self.bid = cookie['bid']
+
             return self.bid
 
     def __format_list(self, sidlist, verb=None):
