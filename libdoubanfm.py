@@ -90,7 +90,6 @@ class DoubanFM(object):
         
             r1 = conn.getresponse()
             resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
-            print r1.read()
 
             if not resultCookie.has_key('dbcl2'):
                 raise DoubanLoginException()
@@ -241,16 +240,18 @@ class DoubanFM(object):
 
         self.__remote_fm(params)
 
-    def played_list(self, history=[]):
+    def played_list(self, sid, history=[]):
         """
         request more playlist items
         * history - your playlist history(played songs and skipped songs)
         """
         params = self.__get_default_params('p')
         params['h'] = self.__format_list(history[:50])
+        params['sid'] = sid
         
         results = self.__remote_fm(params)
-        return json.loads(results)['song']
+        songs = json.loads(results)['song']
+        return songs
 
 #### recommand related
             

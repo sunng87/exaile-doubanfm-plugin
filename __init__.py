@@ -250,7 +250,6 @@ class DoubanRadioPlugin(object):
         if isinstance(playlist, DoubanFMPlaylist):
             ## check if last one
             ## playlist.index(track), len(playlist.get_tracks())
-            print self.get_tracks_remain()
             if self.get_tracks_remain() <= 1:
                 self.load_more(playlist)
 
@@ -261,10 +260,11 @@ class DoubanRadioPlugin(object):
 
     def load_more(self, playlist):
         sids = self.get_history_sids(playlist)
+        current_sid = self.get_current_track().get_tag_raw('sid')[0]
         retry = 0
-        while retry < 3:
+        while retry < 1:
             try:
-                songs = self.doubanfm.played_list(sids)
+                songs = self.doubanfm.played_list(current_sid, sids)
             except:
                 retry += 1
                 continue
