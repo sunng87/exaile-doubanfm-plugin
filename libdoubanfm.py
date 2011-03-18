@@ -36,6 +36,23 @@ from Cookie import SimpleCookie
 
 __all__ = ['DoubanFM', 'DoubanLoginException', 'DoubanFMChannels']
 
+class DoubanTrack(object):
+    def __init__(self, **data):
+        for name in data:
+            self.__setattr__(name, data[name])
+
+    def get_start_value(self):
+        return "%sg%sg0" % (self.sid, self.ssid)
+
+    def get_uri(self):
+        return "http://douban.fm/?start=%s" % (self.get_start_value())
+
+    def __getattr__(self, name):
+        if hasattr(self, name):
+            return object.__getattr__(name)
+        else:
+            return None
+
 class DoubanLoginException(Exception):
     pass
 
@@ -144,12 +161,15 @@ class DoubanFM(object):
 
         return params
 
-    def __remote_fm(self, params):
+    def __remote_fm(self, params, start=None):
         """
         io with douban.fm
         """
         data = urllib.urlencode(params)
-        cookie = 'dbcl2="%s"; bid="%s"' % (self.dbcl2, self.bid)
+        if start is not None:
+            cookie = 'dbcl2="%s"; bid="%s"; start="%s"' % (self.dbcl2, self.bid, start)
+        else:
+            cookie = 'dbcl2="%s"; bid="%s"' % (self.dbcl2, self.bid)
         header = {"Cookie": cookie}
         with contextlib.closing(httplib.HTTPConnection("douban.fm")) as conn:
             conn.request('GET', "/j/mine/playlist?"+data, None, header)
@@ -158,6 +178,9 @@ class DoubanFM(object):
             return result
 
 ### playlist related
+
+    def json_to_douban_tracks(self, item):
+        return DoubanTrack(**item)
             
     def new_playlist(self, history=[]):
         """
@@ -169,7 +192,7 @@ class DoubanFM(object):
 
         results = self.__remote_fm(params)
 
-        return json.loads(results)['song']
+        return map(self.json_to_douban_tracks, json.loads(results)['song'])
                 
     def del_song(self, sid, aid, rest=[]):
         """
@@ -183,8 +206,8 @@ class DoubanFM(object):
         params['aid'] = aid
         params['rest'] = self.__format_list(rest)
 
-        result = self.__remote_fm(params)
-        return json.loads(result)['song']
+        results = self.__remote_fm(params)
+        return map(self.json_to_douban_tracks, json.loads(results)['song'])
 
     def fav_song(self, sid, aid):
         """
@@ -223,8 +246,8 @@ class DoubanFM(object):
         params['sid'] = sid
         params['aid'] = aid
     
-        result = self.__remote_fm(params)
-        return json.loads(result)['song']
+        results = self.__remote_fm(params)
+        return map(self.json_to_douban_tracks, json.loads(results)['song'])
 
     def played_song(self, sid, aid, du=0):
         """
@@ -250,8 +273,7 @@ class DoubanFM(object):
         params['sid'] = sid
         
         results = self.__remote_fm(params)
-        songs = json.loads(results)['song']
-        return songs
+        return map(self.json_to_douban_tracks, json.loads(results)['song'])
 
 #### recommand related
             

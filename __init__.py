@@ -24,20 +24,21 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdoubanfm import DoubanFM
+from libdoubanfm import DoubanFM, DoubanTrack
 from doubanfm_mode import DoubanFMMode
-from doubanfm_track import DoubanFMTrack
 from doubanfm_cover import DoubanFMCover
 
 import dbfm_pref
 
 import gtk
 import time
+import urllib
 from string import Template
 
 from xl import common, event, main, playlist, xdg, settings, trax, providers
 from xl.radio import *
 from xl.nls import gettext as _
+from xl.trax import Track
 from xlgui import guiutil
 
 
@@ -62,6 +63,9 @@ def disable(exaile):
 def get_preferences_pane():
     return dbfm_pref
 
+SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl=%s&rcontent=&rtitle=%s",
+        'renren': "http://www.connect.renren.com/share/sharer?title=%s&url=%s",
+        'sina': "http://v.t.sina.com.cn/share/share.php?appkey=3015934887&url=%s&title=%s&source=&sourceUrl=&content=utf-8&pic=%s"}
 
 class DoubanRadioPlugin(object):
     @common.threaded
@@ -111,7 +115,6 @@ class DoubanRadioPlugin(object):
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
         songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
-        
         self.load_more_tracks(songs)
 
     def load_more_tracks(self, songs):
@@ -199,10 +202,42 @@ class DoubanRadioPlugin(object):
         data = dict(title=title, album=album, artist=artist)
 
         recommend_words = recommend_tpl.safe_substitute(**data)
-        url = track.get_tag_raw('uri')[0]
+        
+        sid = track.get_tag_raw('sid')[0]
+        ssid = track.get_tag_raw('ssid')[0]
+        track = DoubanTrack(sid=sid, ssid=ssid)
+
+        url = track.get_uri()
         t = artist + " " + title
 
         self.doubanfm.recommend(url, recommend_words, title=t, t="I")
+
+    def share(self, target, track):
+        if target not in SHARE_TEMPLATE:
+            return None
+
+        templ = SHARE_TEMPLATE[target]
+        data = {}
+        data['title'] = track.get_tag_raw('title')[0]
+        data['artist'] = track.get_tag_raw('artist')[0]
+        data['sid'] = track.get_tag_raw('sid')[0]
+        data['ssid'] = track.get_tag_raw('ssid')[0]
+        data['picture'] = track.get_tag_raw('cover_url')[0]
+
+        track = DoubanTrack(**data)
+
+        if target == 'renren':
+            title = track.title + ", " + track.artist
+            p = templ % tuple(map(urllib.quote_plus, [title.encode('utf8'), track.get_uri()]))
+            return p
+        if target == 'kaixin001':
+            title = track.title + ", " + track.artist
+            p = templ % tuple(map(urllib.quote_plus, [track.get_uri(), title.encode('utf8')]))
+            return p
+        if target == 'sina':
+            title = track.title + ", " + track.artist
+            p = templ % tuple(map(urllib.quote_plus, [track.get_uri(), title.encode('utf8'), track.picture]))
+            return p
 
     def get_tracks_remain(self):
         pl = self.get_current_playlist()
@@ -225,15 +260,14 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def play_feedback(self, type, player, current_track):
-        if DoubanFMTrack.is_douban_track(current_track):
-            if self.skipped:
-                self.skipped = False
-                return
-            track = current_track
-            sid = track.get_tag_raw('sid')[0]
-            aid = track.get_tag_raw('aid')[0]
-            if sid is not None and aid is not None:
-                self.doubanfm.played_song(sid, aid)
+        if self.skipped:
+            self.skipped = False
+            return
+        track = current_track
+        sid = track.get_tag_raw('sid')[0]
+        aid = track.get_tag_raw('aid')[0]
+        if sid is not None and aid is not None:
+            self.doubanfm.played_song(sid, aid)
 
     def get_current_playlist(self):
         return self.exaile.gui.main.get_selected_playlist().playlist
@@ -307,15 +341,19 @@ class DoubanRadioPlugin(object):
         self.modeMenuItem.show()
     
     def create_track_from_douban_song(self, song):
-        uri = song['url']
+        track = Track(song.url)
+        track.set_tag_raw('sid', song.sid)
+        track.set_tag_raw('aid', song.aid)
+        track.set_tag_raw('ssid', song.ssid or '')
 
-        doubanTrack = DoubanFMTrack(uri, song['aid'], song['sid'], song['like'])
-        doubanTrack.set_tag_raw('title', song['title'])
-        doubanTrack.set_tag_raw('artist', song['artist'])
-        doubanTrack.set_tag_raw('album', song['albumtitle'])
-        doubanTrack.set_tag_raw('cover_url', song['picture'])
+        track.set_tag_raw('uri', song.url)
+        track.set_tag_raw('cover_url', song.picture)
+        track.set_tag_raw('title', song.title)
+        track.set_tag_raw('artist', song.artist)
+        track.set_tag_raw('album', song.albumtitle)
+        track.set_tag_raw('fav', str(song.like) or '0')
 
-        return doubanTrack.track
+        return track
 
     def show_mode(self, *e):
         self.doubanfm_mode.show()

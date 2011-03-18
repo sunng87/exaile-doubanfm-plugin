@@ -183,8 +183,8 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Switch to nornal mode</property>
                     <property name="focus_on_click">False</property>
-                    <accelerator key="g" signal="activate"/>
                     <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
+                    <accelerator key="g" signal="activate"/>
                     <signal name="clicked" handler="on_go_home_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image4">
@@ -252,23 +252,58 @@
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="menuitem9">
-        <property name="label" translatable="yes">Recommend Song</property>
+      <object class="GtkMenuItem" id="menuitem10">
         <property name="visible">True</property>
         <property name="sensitive">False</property>
-        <property name="image">image13</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_recommend_song"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkImageMenuItem" id="menuitem8">
-        <property name="label" translatable="yes">Recommend Album</property>
-        <property name="visible">True</property>
-        <property name="sensitive">False</property>
-        <property name="image">image11</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_recommend"/>
+        <property name="label" translatable="yes">Share</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="menu1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkMenuItem" id="menuitem8">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Album on Douban</property>
+                <signal name="activate" handler="on_recommend"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem9">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Track on Douban</property>
+                <signal name="activate" handler="on_recommend_song"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem11">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Track on Sina</property>
+                <signal name="activate" handler="on_share_sina"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem12">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Track on Kaixin001</property>
+                <signal name="activate" handler="on_share_kaixin001"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem13">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Track on Renren</property>
+                <signal name="activate" handler="on_share_renren"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem14">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Copy Permalink</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_copy_permalink"/>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
     <child>
@@ -342,13 +377,5 @@
   <object class="GtkImage" id="image10">
     <property name="visible">True</property>
     <property name="stock">gtk-new</property>
-  </object>
-  <object class="GtkImage" id="image11">
-    <property name="visible">True</property>
-    <property name="stock">gtk-ok</property>
-  </object>
-  <object class="GtkImage" id="image13">
-    <property name="visible">True</property>
-    <property name="stock">gtk-ok</property>
   </object>
 </interface>

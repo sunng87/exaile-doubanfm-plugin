@@ -39,7 +39,7 @@ from xlgui.main import PlaybackProgressBar
 from xlgui.widgets import info
 from xl.nls import gettext as _
 
-from doubanfm_track import DoubanFMTrack
+from libdoubanfm import DoubanTrack
 
 def get_resource_path(filename):
     basedir = os.path.dirname(os.path.realpath(__file__))
@@ -67,6 +67,10 @@ class DoubanFMMode():
             'on_recommend': self.on_recommend,
             'on_pausebutton_toggled': self.on_pausebutton_toggled,
             'on_recommend_song': self.on_recommend_song,
+            'on_share_sina': self.on_share_sina,
+            'on_share_renren': self.on_share_renren,
+            'on_share_kaixin001': self.on_share_kaixin001,
+            'on_copy_permalink': self.on_copy_permalink,
         })
 
         self.window = self.builder.get_object('doubanfm_mode_window')
@@ -98,8 +102,7 @@ class DoubanFMMode():
 
         self.report_menuitem = self.builder.get_object('menuitem1')
         self.album_menuitem = self.builder.get_object('menuitem2')
-        self.recmd_menuitem = self.builder.get_object('menuitem8')
-        self.recmds_menuitem = self.builder.get_object('menuitem9')
+        self.recmd_menuitem = self.builder.get_object('menuitem10')
 
         self.sensitive_widgets = [
             self.bookmark_button,
@@ -109,7 +112,6 @@ class DoubanFMMode():
             self.report_menuitem,
             self.album_menuitem,
             self.recmd_menuitem,
-            self.recmds_menuitem,
         ]
 
         progress_box = self.builder.get_object('playback_progressbar')
@@ -208,8 +210,6 @@ class DoubanFMMode():
 
     def on_bookmark_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not DoubanFMTrack.is_douban_track(track):
-            return
 
         if track.get_tag_raw("fav")[0] == "1":
             self.dbfm_plugin.mark_as_dislike(track)
@@ -222,14 +222,10 @@ class DoubanFMMode():
 
     def on_skip_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not DoubanFMTrack.is_douban_track(track):
-            return
         self.dbfm_plugin.mark_as_skip(track)
 
     def on_delete_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        if not DoubanFMTrack.is_douban_track(track):
-            return
         self.dbfm_plugin.mark_as_recycle(track)
 
     def on_go_home_button_clicked(self, *e):
@@ -283,6 +279,21 @@ class DoubanFMMode():
             url = "http://music.douban.com/subject/%s/report?song_id=%s" % (aid, sid)
             os.popen(' '.join(['xdg-open', url]))
 
+    def on_share_sina(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        url = self.dbfm_plugin.share('sina', track)
+        os.popen(' '.join(['xdg-open', '"%s"'%url]))
+
+    def on_share_kaixin001(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        url = self.dbfm_plugin.share('kaixin001', track)
+        os.popen(' '.join(['xdg-open', '"%s"'%url]))
+
+    def on_share_renren(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        url = self.dbfm_plugin.share('renren', track)
+        os.popen(' '.join(['xdg-open', '"%s"'%url]))
+
     def destroy(self):
         self.window.destroy()
         event.remove_callback(self.on_playback_start, 'playback_track_start')
@@ -323,4 +334,12 @@ class DoubanFMMode():
             self.pause_button.set_image(
                     gtk.image_new_from_stock('gtk-media-pause', gtk.ICON_SIZE_BUTTON))
 
+    def on_copy_permalink(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        sid = track.get_tag_raw('sid')[0]
+        ssid = track.get_tag_raw('ssid')[0]
+        t = DoubanTrack(sid=sid, ssid=ssid)
+        url = t.get_uri()
+        c = gtk.Clipboard()
+        c.set_text(url)
 
