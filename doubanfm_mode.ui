@@ -183,8 +183,8 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Switch to nornal mode</property>
                     <property name="focus_on_click">False</property>
-                    <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
                     <accelerator key="g" signal="activate"/>
+                    <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK | GDK_MOD1_MASK"/>
                     <signal name="clicked" handler="on_go_home_button_clicked"/>
                     <child>
                       <object class="GtkImage" id="image4">
@@ -292,6 +292,14 @@
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Share Track on Renren</property>
                 <signal name="activate" handler="on_share_renren"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem15">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Track on Twitter</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_share_twitter"/>
               </object>
             </child>
             <child>

@@ -70,6 +70,7 @@ class DoubanFMMode():
             'on_share_sina': self.on_share_sina,
             'on_share_renren': self.on_share_renren,
             'on_share_kaixin001': self.on_share_kaixin001,
+            'on_share_twitter': self.on_share_twitter,
             'on_copy_permalink': self.on_copy_permalink,
         })
 
@@ -292,6 +293,11 @@ class DoubanFMMode():
     def on_share_renren(self, *e):
         track = self.dbfm_plugin.get_current_track()
         url = self.dbfm_plugin.share('renren', track)
+        os.popen(' '.join(['xdg-open', '"%s"'%url]))
+
+    def on_share_twitter(self, *e):
+        track = self.dbfm_plugin.get_current_track()
+        url = self.dbfm_plugin.share('twitter', track)
         os.popen(' '.join(['xdg-open', '"%s"'%url]))
 
     def destroy(self):
