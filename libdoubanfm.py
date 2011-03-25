@@ -48,10 +48,7 @@ class DoubanTrack(object):
         return "http://douban.fm/?start=%s" % (self.get_start_value())
 
     def __getattr__(self, name):
-        if hasattr(self, name):
-            return object.__getattr__(name)
-        else:
-            return None
+        return getattr(self, name, None)
 
 class DoubanLoginException(Exception):
     pass
