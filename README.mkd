@@ -12,14 +12,18 @@ There is a minimized view for DoubanFM tracks, you can:
 * Skip a track
 * Delete a track
 * Douban covers support, fast retrieve album art from Douban.com
-* Share music and album to douban.com
+* Share music and album to douban.com, t.sina.com.cn, kaixin001 and renren.com
 * Switch between channels
 
-![DoubanFM Mode](http://farm6.static.flickr.com/5047/5208490641_3fb0cf3069.jpg "Douban FM Mode")
+![DoubanFM Mode](http://farm6.static.flickr.com/5092/5539013314_be4d6ff6ee.jpg "Douban FM Mode")
 
 Install
 -------
-[Installation Instructions](https://github.com/sunng87/exaile-doubanfm-plugin/wiki/Installation).
+
+Follow the [Installation Instructions](https://github.com/sunng87/exaile-doubanfm-plugin/wiki/Installation).
+
+Or you can just extract the package to ~/.local/share/exaile/plugins
+
 
 
 
