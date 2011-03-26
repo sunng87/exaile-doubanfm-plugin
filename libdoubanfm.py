@@ -38,8 +38,9 @@ __all__ = ['DoubanFM', 'DoubanLoginException', 'DoubanFMChannels']
 
 class DoubanTrack(object):
     def __init__(self, **data):
+        self.props = {}
         for name in data:
-            self.__setattr__(name, data[name])
+            self.props[name] = data[name]
 
     def get_start_value(self):
         return "%sg%sg0" % (self.sid, self.ssid)
@@ -48,7 +49,10 @@ class DoubanTrack(object):
         return "http://douban.fm/?start=%s" % (self.get_start_value())
 
     def __getattr__(self, name):
-        return getattr(self, name, None)
+        if name in self.props:
+            return self.props[name]
+        else:
+            return None
 
 class DoubanLoginException(Exception):
     pass
