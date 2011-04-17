@@ -270,10 +270,11 @@ class DoubanRadioPlugin(object):
             self.skipped = False
             return
         track = current_track
-        sid = track.get_tag_raw('sid')[0]
-        aid = track.get_tag_raw('aid')[0]
-        if sid is not None and aid is not None:
-            self.doubanfm.played_song(sid, aid)
+        if track.get_tag_raw('sid'):
+            sid = track.get_tag_raw('sid')[0]
+            aid = track.get_tag_raw('aid')[0]
+            if sid is not None and aid is not None:
+                self.doubanfm.played_song(sid, aid)
 
     def get_current_playlist(self):
         return self.exaile.gui.main.get_selected_playlist().playlist
