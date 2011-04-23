@@ -339,7 +339,7 @@ class DoubanRadioPlugin(object):
         self.menuItem.show()
 
         self.modeMenuItem = gtk.MenuItem(_('DoubanFM mode'))
-        key, modifier = gtk.accelerator_parse('<Control><Alt>D')
+        key, modifier = gtk.accelerator_parse('<Control>D')
         self.accels = gtk.AccelGroup()
         self.modeMenuItem.add_accelerator('activate', self.accels, key, modifier, gtk.ACCEL_VISIBLE)
         self.exaile.gui.main.window.add_accel_group(self.accels)
