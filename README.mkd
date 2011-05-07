@@ -29,15 +29,27 @@ DBus Interfaces
 
 Exaile doubanfm exposes dbus interfaces to allow control from external. 
 
-The methods available are listed below:
+* interface: `info.sunng.ExaileDoubanfm`
+* path: `/info/sunng/ExaileDoubanfm`
+* dest: `info.sunng.ExaileDoubanfm.instance`
+
+Methods available are listed below:
 
 * info.sunng.ExaileDoubanfm.Favorite
 * info.sunng.ExaileDoubanfm.Unfavorite
+* info.sunng.ExaileDoubanfm.ToggleFavorite
 * info.sunng.ExaileDoubanfm.Skip
 * info.sunng.ExaileDoubanfm.Delete
 
+Signals avaiable are listed below:
+
+* info.sunng.ExaileDoubanfm.StatusChanged
+
 If you use `dbus-send`, you can refer this:
 
-    dbus-send --session --dest=info.sunng.ExaileDoubanfm.instance --print-reply /info/sunng/ExaileDoubanfm info.sunng.ExaileDoubanfm.Favorite
+    dbus-send --session --dest=info.sunng.ExaileDoubanfm.instance \
+    --print-reply /info/sunng/ExaileDoubanfm \
+    info.sunng.ExaileDoubanfm.Favorite
+
 
 

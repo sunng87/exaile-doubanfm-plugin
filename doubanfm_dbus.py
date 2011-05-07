@@ -39,17 +39,17 @@ class DoubanFMDBusService(dbus.service.Object):
         props = {}
         for p in prop_names:
             props[p] = getattr(self, p)()
-        self.PropertiesChanged(DOUBANFM_INTERFACE_NAME, props, [])
+        self.PropertiesChanged(props)
 
-    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
-    def Get(self, interface, prop):
-        if hasattr(self, prop):
-            result = getattr(self, prop)()
-            return result
-        return None
+#    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
+#    def Get(self, interface, prop):
+#        if hasattr(self, prop):
+#            result = getattr(self, prop)()
+#            return result
+#        return None
 
-    @dbus.service.signal(dbus.PROPERTIES_IFACE, signature='sa{sv}as')
-    def PropertiesChanged(self, interface, updated, invalid):
+    @dbus.service.signal(DOUBANFM_INTERFACE_NAME, signature='a{sv}')
+    def StatusChanged(self, updated):
         #logger.info("fired")
         pass
 
