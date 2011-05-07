@@ -62,6 +62,14 @@ class DoubanFMDBusService(dbus.service.Object):
         self.dbfm_plugin.mark_as_dislike(self.__get_current_track())
 
     @dbus.service.method(DOUBANFM_INTERFACE_NAME)
+    def ToggleFavorite(self):
+        current_track = self.__get_current_track()
+        if current_track.get_tag_raw('fav')[0] == '0':
+            self.dbfm_plugin.mark_as_like(current_track)
+        else:
+            self.dbfm_plugin.mark_as_dislike(current_track)
+
+    @dbus.service.method(DOUBANFM_INTERFACE_NAME)
     def Skip(self):
         self.dbfm_plugin.mark_as_skip(self.__get_current_track())
 
