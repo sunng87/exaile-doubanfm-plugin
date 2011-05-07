@@ -39,7 +39,7 @@ class DoubanFMDBusService(dbus.service.Object):
         props = {}
         for p in prop_names:
             props[p] = getattr(self, p)()
-        self.PropertiesChanged(props)
+        self.StatusChanged(props)
 
 #    @dbus.service.method(dbus.PROPERTIES_IFACE, in_signature='ss', out_signature='v')
 #    def Get(self, interface, prop):
@@ -92,7 +92,7 @@ class DoubanFMDBusService(dbus.service.Object):
                 break
 
         metadata['cover_url'] = current_track.get_tag_raw('cover_url')[0]
-        metadata['link']  = current_track.get_tag_raw('fav')[0]
+        metadata['like']  = current_track.get_tag_raw('fav')[0]
         return dbus.types.Dictionary(metadata, signature='sv', variant_level=1)
 
     def Status(self):
