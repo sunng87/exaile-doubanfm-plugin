@@ -32,7 +32,7 @@ DOUBANFM_INTERFACE_NAME="info.sunng.ExaileDoubanfm"
 
 class DoubanFMDBusService(dbus.service.Object):
     def __init__(self, dbfm_plugin, bus):
-        dbus.service.Object.__(self, bus, DOUBANFM_INTERFACE_NAME)
+        dbus.service.Object.__init__(self, bus, '/info/sunng/ExaileDoubanfm')
         self.dbfm_plugin = dbfm_plugin
 
     def populate(self, *prop_names):
@@ -85,7 +85,7 @@ class DoubanFMDBusService(dbus.service.Object):
 
         metadata['cover_url'] = current_track.get_tag_raw('cover_url')[0]
         metadata['link']  = current_track.get_tag_raw('fav')[0]
-        return metadata
+        return dbus.types.Dictionary(metadata, signature='sv', variant_level=1)
 
     def Status(self):
         return self.status
@@ -102,9 +102,9 @@ class DoubanFMDBusController(object):
 
     def acquire_dbus(self):
         if self.bus:
-            self.bus.get_bus().request_name(DBUS_OBJECT_NAME)
+            self.bus.get_bus().request_name(self.DBUS_OBJECT_NAME)
         else:
-            self.bus = dbus.service.BusName(DBUS_OBJECT_NAME, bus=dbus.SessionBus())
+            self.bus = dbus.service.BusName(self.DBUS_OBJECT_NAME, bus=dbus.SessionBus())
         self.adapter = DoubanFMDBusService(self.dbfm_plugin, self.bus)
 
     def release_dbus(self):

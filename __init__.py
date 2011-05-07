@@ -27,6 +27,7 @@
 from libdoubanfm import DoubanFM, DoubanTrack
 from doubanfm_mode import DoubanFMMode
 from doubanfm_cover import DoubanFMCover
+from doubanfm_dbus import DoubanFMDBusController
 
 import dbfm_pref
 
@@ -78,6 +79,8 @@ class DoubanRadioPlugin(object):
         self.exaile = exaile
         self.__create_menu_item__()
 
+        self.check_to_enable_dbus()
+
         self.__register_events()
         self.doubanfm_mode = DoubanFMMode(self.exaile, self)
         self.doubanfm_cover = DoubanFMCover()
@@ -85,6 +88,7 @@ class DoubanRadioPlugin(object):
 
         ## mark if a track is skipped instead of end normally
         self.skipped = False
+
 
     @staticmethod
     def __translate_channels():
@@ -98,10 +102,16 @@ class DoubanRadioPlugin(object):
         event.add_callback(self.close_playlist, 'quit_application')
         event.add_callback(self.play_feedback, 'playback_track_end')
 
+        if self.dbus_controller:
+            self.dbus_controller.register_events()
+
     def __unregister_events(self):
         event.remove_callback(self.check_to_load_more, 'playback_track_start')
         event.remove_callback(self.close_playlist, 'quit_application')
         event.remove_callback(self.play_feedback, 'playback_track_end')
+
+        if self.dbus_controller:
+            self.dbus_controller.unregister_events()
 
     @common.threaded
     def mark_as_skip(self, track):
@@ -427,6 +437,14 @@ class DoubanRadioPlugin(object):
             self.doubanfm_mode.destroy()
         except:
             pass
+
+    def check_to_enable_dbus(self):
+        if settings.get_option('plugin/douban_radio/dbus_indicator'):
+            self.dbus_controller = DoubanFMDBusController(self)
+            self.dbus_controller.acquire_dbus()
+        else:
+            self.dbus_controller = None
+
        
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name, channel):
