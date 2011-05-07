@@ -435,6 +435,10 @@ class DoubanRadioPlugin(object):
             self.__unregister_events()
 
             self.doubanfm_mode.destroy()
+
+            if self.dbus_controller:
+                self.dbus_controller.unregister_events()
+                self.dbus_controller.release_dbus()
         except:
             pass
 
