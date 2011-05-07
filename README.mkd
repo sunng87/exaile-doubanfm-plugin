@@ -24,6 +24,20 @@ Follow the [Installation Instructions](https://github.com/sunng87/exaile-doubanf
 
 Or you can just extract the package to ~/.local/share/exaile/plugins
 
+DBus Interfaces
+---------------
 
+Exaile doubanfm exposes dbus interfaces to allow control from external. 
+
+The methods available are listed below:
+
+* info.sunng.ExaileDoubanfm.Favorite
+* info.sunng.ExaileDoubanfm.Unfavorite
+* info.sunng.ExaileDoubanfm.Skip
+* info.sunng.ExaileDoubanfm.Delete
+
+If you use `dbus-send`, you can refer this:
+
+    dbus-send --session --dest=info.sunng.ExaileDoubanfm.instance --print-reply /info/sunng/ExaileDoubanfm info.sunng.ExaileDoubanfm.Favorite
 
 
