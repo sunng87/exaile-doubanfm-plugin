@@ -26,9 +26,11 @@
 
 import dbus
 
+from xl import event
+
 DOUBANFM_INTERFACE_NAME="info.sunng.ExaileDoubanfm"
 
-class DoubanFMDBusController(dbus.service.Object):
+class DoubanFMDBusService(dbus.service.Object):
     def __init__(self, dbfm_plugin, bus):
         dbus.service.Object.__(self, bus, DOUBANFM_INTERFACE_NAME)
         self.dbfm_plugin = dbfm_plugin
@@ -52,49 +54,80 @@ class DoubanFMDBusController(dbus.service.Object):
         pass
 
     @dbus.service.method(DOUBANFM_INTERFACE_NAME)
-    def favorite(self):
+    def Favorite(self):
         self.dbfm_plugin.mark_as_like(self.__get_current_track())
 
     @dbus.service.method(DOUBANFM_INTERFACE_NAME)
-    def unfavorite(self):
+    def Unfavorite(self):
         self.dbfm_plugin.mark_as_dislike(self.__get_current_track())
 
     @dbus.service.method(DOUBANFM_INTERFACE_NAME)
-    def skip(self):
+    def Skip(self):
         self.dbfm_plugin.mark_as_skip(self.__get_current_track())
 
     @dbus.service.method(DOUBANFM_INTERFACE_NAME)
-    def delete(self):
+    def Delete(self):
         self.dbfm_plugin.mark_as_skip(self.__get_current_track())
 
     #### dbus properties to expose
 
-    def title(self):
+    def Metadata(self):
+        metadata = {}
         current_track = self.__get_current_track()
-        return current_track.get_tag_raw('title')[0]
+        metadata['title'] = current_track.get_tag_raw('title')[0]
+        metadata['artist'] = current_track.get_tag_raw('artist')[0]
+        metadata['channel_id'] = self.dbfm_plugin.get_current_channel()
 
-    def artist(self):
-        current_track = self.__get_current_track()
-        return current_track.get_tag_raw('artist')[0]
-
-    def channel(self):
-        return self.dbfm_plugin.get_current_channel()
-
-    def channel_name(self):
-        channel_id = self.dbfm_plugin.get_current_channel()
         for k,v in self.dbfm_plugin.channels.items():
-            if v == channel_id:
-                return k
+            if v == metadata['channel_id']:
+                metadata['channel_name'] = k
+                break
 
-    def art_url(self):
-        current_track = self.__get_current_track()
-        return current_track.get_tag_raw('cover_url')[0]
+        metadata['cover_url'] = current_track.get_tag_raw('cover_url')[0]
+        metadata['link']  = current_track.get_tag_raw('fav')[0]
+        return metadata
 
-    def is_favorite(self):
-        current_track = self.__get_current_track()
-        return current_track.get_tag_raw('fav')[0]
+    def Status(self):
+        return self.status
 
     ### helpers
     def __get_current_track(self):
         return self.dbfm_plugin.get_current_track()
+
+class DoubanFMDBusController(object):
+    DBUS_OBJECT_NAME = 'info.sunng.ExaileDoubanfm.instance'
+    def __init__(self, dbfm_plugin):
+        self.dbfm_plugin = dbfm_plugin
+        self.bus = None
+
+    def acquire_dbus(self):
+        if self.bus:
+            self.bus.get_bus().request_name(DBUS_OBJECT_NAME)
+        else:
+            self.bus = dbus.service.BusName(DBUS_OBJECT_NAME, bus=dbus.SessionBus())
+        self.adapter = DoubanFMDBusService(self.dbfm_plugin, self.bus)
+
+    def release_dbus(self):
+        if self.adapter is not None:
+            self.adapter.remove_from_connection()
+        if self.bus is not None:
+            self.bus.get_bus().release_name(self.bus.get_name())
+
+    def register_events(self):
+        event.add_callback(self.playback_started, 'playback_track_start')
+        event.add_callback(self.playback_stopped, 'playback_track_stop')
+
+    def unregister_events(self):
+        event.remove_callback(self.playback_started, 'playback_track_start')
+        event.remove_callback(self.playback_stopped, 'playback_track_stop')
+
+    def playback_started(self, *e):
+        self.adapter.status = "Playing"
+        self.adapter.populate(*['Status', 'Metadata'])
+
+    def playback_stopped(self, *e):
+        self.adapter.status = "Playing"
+        self.adapter.populate(*['Status'])
+
+
 
