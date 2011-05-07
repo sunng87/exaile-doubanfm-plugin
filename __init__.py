@@ -437,6 +437,7 @@ class DoubanRadioPlugin(object):
             self.doubanfm_mode.destroy()
 
             if self.dbus_controller:
+                self.dbus_controller.on_exit()
                 self.dbus_controller.unregister_events()
                 self.dbus_controller.release_dbus()
         except:
@@ -446,6 +447,7 @@ class DoubanRadioPlugin(object):
         if settings.get_option('plugin/douban_radio/dbus_indicator'):
             self.dbus_controller = DoubanFMDBusController(self)
             self.dbus_controller.acquire_dbus()
+            self.dbus_controller.on_init()
         else:
             self.dbus_controller = None
 

@@ -134,8 +134,15 @@ class DoubanFMDBusController(object):
         self.adapter.populate(*['Status', 'Metadata'])
 
     def playback_stopped(self, *e):
-        self.adapter.status = "Playing"
+        self.adapter.status = "Stop"
         self.adapter.populate(*['Status'])
 
+    def on_init(self):
+        self.adapter.status = "Init"
+        self.adapter.populate(*['Status'])
+
+    def on_exit(self):
+        self.adapter.status = "Exit"
+        self.adapter.populate(*['Status'])
 
 
