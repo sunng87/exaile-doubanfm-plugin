@@ -303,6 +303,14 @@
               </object>
             </child>
             <child>
+              <object class="GtkMenuItem" id="menuitem16">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Share Track on Fanfou</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="on_share_fanfou"/>
+              </object>
+            </child>
+            <child>
               <object class="GtkMenuItem" id="menuitem14">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Copy Permalink</property>

@@ -66,7 +66,8 @@ def get_preferences_pane():
 SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl=%s&rcontent=&rtitle=%s",
         'renren': "http://www.connect.renren.com/share/sharer?title=%s&url=%s",
         'sina': "http://v.t.sina.com.cn/share/share.php?appkey=3015934887&url=%s&title=%s&source=&sourceUrl=&content=utf-8&pic=%s",
-        'twitter': "http://twitter.com/share?text=%s&url=%s"}
+        'twitter': "http://twitter.com/share?text=%s&url=%s",
+        'fanfou': "http://fanfou.com/sharer?u=%s&t=%s&d=&s=bm"}
 
 class DoubanRadioPlugin(object):
     @common.threaded
@@ -243,7 +244,10 @@ class DoubanRadioPlugin(object):
             title = track.title + ", " + track.artist
             p = templ % tuple(map(urllib.quote_plus, [title.encode('utf8'), track.get_uri()]))
             return p
-
+        if target == 'fanfou':
+            title = track.title + ", " + track.artist
+            p = templ % tuple(map(urllib.quote_plus, [track.get_uri(), title.encode('utf8')]))
+            return p
 
     def get_tracks_remain(self):
         pl = self.get_current_playlist()
