@@ -127,6 +127,7 @@ class DoubanFMMode():
 
         event.add_callback(self.on_playback_start, 'playback_track_start', self.exaile.player)
         event.add_callback(self.on_playback_stop, 'playback_track_end', self.exaile.player)
+        event.add_callback(self.on_tag_update, 'track_tags_changed')
         self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
 
         ## added for 0.3.2
@@ -232,7 +233,7 @@ class DoubanFMMode():
     def on_go_home_button_clicked(self, *e):
         self.hide(e)
 
-    def on_playback_start(self, type, player, data):
+    def on_playback_start(self, etype, player, *data):
         track = player.current
         artist = track.get_tag_raw('artist')[0]
         album = track.get_tag_raw('album')[0]
@@ -254,6 +255,14 @@ class DoubanFMMode():
         ## recent change from official client, you can only trash 
         ## song in personal channel
         self.trash_button.set_sensitive(self.dbfm_plugin.get_current_channel() == 0)
+
+    def on_tag_update(self, e, track, tag):
+        if track.get_tag_raw('fav')[0] == "1":
+            self.bookmark_button.set_image(
+                    gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
+        else:
+            self.bookmark_button.set_image(
+                    gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
 
     def on_playback_stop(self, type, player, data):
         self.sensitive(False)
@@ -303,7 +312,8 @@ class DoubanFMMode():
     def destroy(self):
         self.window.destroy()
         event.remove_callback(self.on_playback_start, 'playback_track_start')
-        event.add_callback(self.on_playback_stop, 'playback_track_end', self.exaile.player)
+        event.remove_callback(self.on_playback_stop, 'playback_track_end')
+        event.remove_callback(self.on_track_update, 'track_tags_changed')
         self.exaile.gui.main.disconnect(self._toggle_id)
 
     def on_menu_toggle(self, widget, e):

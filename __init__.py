@@ -155,8 +155,8 @@ class DoubanRadioPlugin(object):
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
 
-        self.doubanfm.unfav_song(sid, aid)
         track.set_tag_raw('fav', '0')
+        self.doubanfm.unfav_song(sid, aid)
 
     @common.threaded
     def mark_as_recycle(self, track):
