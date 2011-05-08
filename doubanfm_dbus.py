@@ -123,11 +123,13 @@ class DoubanFMDBusController(object):
 
     def register_events(self):
         event.add_callback(self.playback_started, 'playback_track_start')
-        event.add_callback(self.playback_stopped, 'playback_track_stop')
+        event.add_callback(self.playback_stopped, 'playback_track_end')
+        event.add_callback(self.on_exit, 'quit_application')
 
     def unregister_events(self):
         event.remove_callback(self.playback_started, 'playback_track_start')
-        event.remove_callback(self.playback_stopped, 'playback_track_stop')
+        event.remove_callback(self.playback_stopped, 'playback_track_end')
+        event.remove_callback(self.on_exit, 'quit_application')
 
     def playback_started(self, *e):
         self.adapter.status = "Playing"
@@ -137,11 +139,11 @@ class DoubanFMDBusController(object):
         self.adapter.status = "Stop"
         self.adapter.populate(*['Status'])
 
-    def on_init(self):
+    def on_init(self, *e):
         self.adapter.status = "Init"
         self.adapter.populate(*['Status'])
 
-    def on_exit(self):
+    def on_exit(self, *e):
         self.adapter.status = "Exit"
         self.adapter.populate(*['Status'])
 
