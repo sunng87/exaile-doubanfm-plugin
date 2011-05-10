@@ -177,44 +177,6 @@ class DoubanRadioPlugin(object):
         rest_sids = self.tracks_to_sids(rest_tracks)
         return rest_sids
         
-    @common.threaded
-    def recommend(self, track):
-        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
-        recommend_tpl = Template(recommend_tpl)
-
-        artist = track.get_tag_raw('artist')[0]
-        album = track.get_tag_raw('album')[0]
-        title = track.get_tag_raw('title')[0]
-
-        data = dict(title=title, album=album, artist=artist)
-
-        recommend_words = recommend_tpl.safe_substitute(**data)
-        aid = track.get_tag_raw('aid')[0]
-
-        self.doubanfm.recommend(aid, recommend_words)
-
-    @common.threaded
-    def recommend_song(self, track):
-        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
-        recommend_tpl = Template(recommend_tpl)
-
-        artist = track.get_tag_raw('artist')[0]
-        album = track.get_tag_raw('album')[0]
-        title = track.get_tag_raw('title')[0]
-
-        data = dict(title=title, album=album, artist=artist)
-
-        recommend_words = recommend_tpl.safe_substitute(**data)
-        
-        sid = track.get_tag_raw('sid')[0]
-        ssid = track.get_tag_raw('ssid')[0]
-        track = DoubanTrack(sid=sid, ssid=ssid)
-
-        url = track.get_uri()
-        t = artist + " " + title
-
-        self.doubanfm.recommend(url, recommend_words, title=t, t="I")
-
     def share(self, target, track):
         if target not in SHARE_TEMPLATE:
             return None
