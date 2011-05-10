@@ -67,7 +67,8 @@ SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl
         'renren': "http://www.connect.renren.com/share/sharer?title=%s&url=%s",
         'sina': "http://v.t.sina.com.cn/share/share.php?appkey=3015934887&url=%s&title=%s&source=&sourceUrl=&content=utf-8&pic=%s",
         'twitter': "http://twitter.com/share?text=%s&url=%s",
-        'fanfou': "http://fanfou.com/sharer?u=%s&t=%s&d=&s=bm"}
+        'fanfou': "http://fanfou.com/sharer?u=%s&t=%s&d=&s=bm",
+        'douban': "http://www.douban.com/recommend/?url=%s"}
 
 class DoubanRadioPlugin(object):
     @common.threaded
@@ -247,6 +248,9 @@ class DoubanRadioPlugin(object):
         if target == 'fanfou':
             title = track.title + ", " + track.artist
             p = templ % tuple(map(urllib.quote_plus, [track.get_uri(), title.encode('utf8')]))
+            return p
+        if target == 'douban':
+            p = templ % tuple(map(urllib.quote_plus, [track.get_uri()]))
             return p
 
     def get_tracks_remain(self):

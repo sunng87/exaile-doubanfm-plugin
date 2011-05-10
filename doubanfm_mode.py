@@ -325,7 +325,8 @@ class DoubanFMMode():
 
     def on_recommend_song(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        self.dbfm_plugin.recommend_song(track)
+        url = self.dbfm_plugin.share('douban', track)
+        os.popen(' '.join(['xdg-open', '"%s"'%url]))
         
     def on_channel_group_change(self, item, data):
         channel_id = data
