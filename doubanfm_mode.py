@@ -64,7 +64,6 @@ class DoubanFMMode():
             'on_item_report_clicked': self.on_button_report_clicked,
             'on_menu_toggle': self.on_menu_toggle,
             'on_quit': self.on_quit,
-            'on_recommend': self.on_recommend,
             'on_pausebutton_toggled': self.on_pausebutton_toggled,
             'on_recommend_song': self.on_recommend_song,
             'on_share_sina': self.on_share_sina,
@@ -329,13 +328,10 @@ class DoubanFMMode():
     def on_quit(self, *e):
         self.exaile.gui.main.quit()
 
-    def on_recommend(self, *e):
-        track = self.dbfm_plugin.get_current_track()
-        self.dbfm_plugin.recommend(track)
-
     def on_recommend_song(self, *e):
         track = self.dbfm_plugin.get_current_track()
-        self.dbfm_plugin.recommend_song(track)
+        url = self.dbfm_plugin.share('douban', track)
+        os.popen(' '.join(['xdg-open', '"%s"'%url]))
         
     def on_channel_group_change(self, item, data):
         channel_id = data

@@ -68,7 +68,8 @@ SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl
         'renren': "http://www.connect.renren.com/share/sharer?title=%s&url=%s",
         'sina': "http://v.t.sina.com.cn/share/share.php?appkey=3015934887&url=%s&title=%s&source=&sourceUrl=&content=utf-8&pic=%s",
         'twitter': "http://twitter.com/share?text=%s&url=%s",
-        'fanfou': "http://fanfou.com/sharer?u=%s&t=%s&d=&s=bm"}
+        'fanfou': "http://fanfou.com/sharer?u=%s&t=%s&d=&s=bm",
+        'douban': "http://www.douban.com/recommend/?url=%s"}
 
 class DoubanRadioPlugin(object):
     @common.threaded
@@ -186,44 +187,6 @@ class DoubanRadioPlugin(object):
         rest_sids = self.tracks_to_sids(rest_tracks)
         return rest_sids
         
-    @common.threaded
-    def recommend(self, track):
-        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
-        recommend_tpl = Template(recommend_tpl)
-
-        artist = track.get_tag_raw('artist')[0]
-        album = track.get_tag_raw('album')[0]
-        title = track.get_tag_raw('title')[0]
-
-        data = dict(title=title, album=album, artist=artist)
-
-        recommend_words = recommend_tpl.safe_substitute(**data)
-        aid = track.get_tag_raw('aid')[0]
-
-        self.doubanfm.recommend(aid, recommend_words)
-
-    @common.threaded
-    def recommend_song(self, track):
-        recommend_tpl = settings.get_option("plugin/douban_radio/rcm_tpl")
-        recommend_tpl = Template(recommend_tpl)
-
-        artist = track.get_tag_raw('artist')[0]
-        album = track.get_tag_raw('album')[0]
-        title = track.get_tag_raw('title')[0]
-
-        data = dict(title=title, album=album, artist=artist)
-
-        recommend_words = recommend_tpl.safe_substitute(**data)
-        
-        sid = track.get_tag_raw('sid')[0]
-        ssid = track.get_tag_raw('ssid')[0]
-        track = DoubanTrack(sid=sid, ssid=ssid)
-
-        url = track.get_uri()
-        t = artist + " " + title
-
-        self.doubanfm.recommend(url, recommend_words, title=t, t="I")
-
     def share(self, target, track):
         if target not in SHARE_TEMPLATE:
             return None
@@ -258,6 +221,9 @@ class DoubanRadioPlugin(object):
             title = track.title + ", " + track.artist
             p = templ % tuple(map(urllib.quote_plus, [track.get_uri(), title.encode('utf8')]))
             return p
+        if target == 'douban':
+            p = templ % tuple(map(urllib.quote_plus, [track.get_uri()]))
+            return p
 
     def get_tracks_remain(self):
         pl = self.get_current_playlist()
@@ -268,7 +234,7 @@ class DoubanRadioPlugin(object):
     def get_current_track(self):
         pl = self.get_current_playlist()
         if isinstance(pl, DoubanFMPlaylist):
-	        return pl.get_tracks()[pl.get_current_pos()]
+            return pl.get_tracks()[pl.get_current_pos()]
         else:
             return None
 
@@ -405,14 +371,15 @@ class DoubanRadioPlugin(object):
             return
 
         tracks = map(self.create_track_from_douban_song, songs)
+        channel_name = self.channel_id_to_name(channel_id)
         plist = self.create_playlist(
-                _('DoubanFM'), channel_id, tracks)
+                'DoubanFM %s' % channel_name, channel_id, tracks)
         
         self.exaile.gui.main.add_playlist(plist)
 
         if auto: 
             self._stop()
-            self._play()
+            self._play()            
 
     def _stop(self):
         self.exaile.player.stop()
@@ -455,6 +422,11 @@ class DoubanRadioPlugin(object):
         else:
             self.dbus_controller = None
 
+    def channel_id_to_name(self, channel_id):
+        for k,v in self.channels.items():
+            if v == channel_id:
+                return k
+        return None
        
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name, channel):
