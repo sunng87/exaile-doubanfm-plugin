@@ -224,7 +224,7 @@ class DoubanRadioPlugin(object):
     def get_current_track(self):
         pl = self.get_current_playlist()
         if isinstance(pl, DoubanFMPlaylist):
-	        return pl.get_tracks()[pl.get_current_pos()]
+            return pl.get_tracks()[pl.get_current_pos()]
         else:
             return None
 
@@ -361,14 +361,15 @@ class DoubanRadioPlugin(object):
             return
 
         tracks = map(self.create_track_from_douban_song, songs)
+        channel_name = self.channel_id_to_name(channel_id)
         plist = self.create_playlist(
-                _('DoubanFM'), channel_id, tracks)
+                'DoubanFM %s' % channel_name, channel_id, tracks)
         
         self.exaile.gui.main.add_playlist(plist)
 
         if auto: 
             self._stop()
-            self._play()
+            self._play()            
 
     def _stop(self):
         self.exaile.player.stop()
@@ -397,6 +398,12 @@ class DoubanRadioPlugin(object):
             self.doubanfm_mode.destroy()
         except:
             pass
+
+    def channel_id_to_name(self, channel_id):
+        for k,v in self.channels.items():
+            if v == channel_id:
+                return k
+        return None
        
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name, channel):
