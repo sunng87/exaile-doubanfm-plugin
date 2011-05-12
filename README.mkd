@@ -30,8 +30,8 @@ DBus Interfaces
 Exaile doubanfm exposes dbus interfaces to allow control from external. 
 
 Dbus introspection:
-    $ gdbus introspect --session --dest info.sunng.ExaileDoubanfm.instance --object-path /info/sunng/ExaileDoubanfm
 
+    $ gdbus introspect --session --dest info.sunng.ExaileDoubanfm.instance --object-path /info/sunng/ExaileDoubanfm
     node /info/sunng/ExaileDoubanfm {
       interface org.freedesktop.DBus.Introspectable {
         methods:
