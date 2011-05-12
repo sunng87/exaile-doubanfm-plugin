@@ -29,21 +29,28 @@ DBus Interfaces
 
 Exaile doubanfm exposes dbus interfaces to allow control from external. 
 
-* interface: `info.sunng.ExaileDoubanfm`
-* path: `/info/sunng/ExaileDoubanfm`
-* dest: `info.sunng.ExaileDoubanfm.instance`
+Dbus introspection:
+    $ gdbus introspect --session --dest info.sunng.ExaileDoubanfm.instance --object-path /info/sunng/ExaileDoubanfm
 
-Methods available are listed below:
-
-* info.sunng.ExaileDoubanfm.Favorite
-* info.sunng.ExaileDoubanfm.Unfavorite
-* info.sunng.ExaileDoubanfm.ToggleFavorite
-* info.sunng.ExaileDoubanfm.Skip
-* info.sunng.ExaileDoubanfm.Delete
-
-Signals avaiable are listed below:
-
-* info.sunng.ExaileDoubanfm.StatusChanged
+    node /info/sunng/ExaileDoubanfm {
+      interface org.freedesktop.DBus.Introspectable {
+        methods:
+          Introspect(out s arg_0);
+        signals:
+        properties:
+      };
+      interface info.sunng.ExaileDoubanfm {
+        methods:
+          Unfavorite();
+          Skip();
+          Favorite();
+          Delete();
+          ToggleFavorite();
+        signals:
+          StatusChanged(a{sv} updated);
+        properties:
+      };
+    };
 
 If you use `dbus-send`, you can refer this:
 
