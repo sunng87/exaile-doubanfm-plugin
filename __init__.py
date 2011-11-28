@@ -24,7 +24,7 @@
 # do so. If you do not wish to do so, delete this exception statement
 # from your version.
 
-from libdoubanfm import DoubanFM, DoubanTrack
+from libdoubanfm import DoubanFM, DoubanTrack, DoubanLoginException
 from doubanfm_mode import DoubanFMMode
 from doubanfm_cover import DoubanFMCover
 from doubanfm_dbus import DoubanFMDBusController
@@ -84,7 +84,13 @@ class DoubanRadioPlugin(object):
     def do_init(self, *args):
         username = settings.get_option("plugin/douban_radio/username")  
         password = settings.get_option("plugin/douban_radio/password")
-        self.doubanfm = DoubanFM(username, password)
+        try:
+            self.doubanfm = DoubanFM(username, password)
+        except DoubanLoginException as e:
+            self.exaile.gui.main.message.show_error(
+                _('Douban FM Error'),
+                _('Failed to login to douban.fm with your credential'))
+            return
         self.channels = self.doubanfm.channels
 
         self.__create_menu_item__()
