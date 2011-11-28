@@ -53,9 +53,8 @@ def enable(exaile):
 
 def _enable(device, exaile, nothing):
     global DOUBANFM
-    username = settings.get_option("plugin/douban_radio/username")  
-    password = settings.get_option("plugin/douban_radio/password")
-    DOUBANFM = DoubanRadioPlugin(exaile, username, password)
+
+    DOUBANFM = DoubanRadioPlugin(exaile)
 
 def disable(exaile):
     global DOUBANFM
@@ -73,12 +72,21 @@ SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl
 
 class DoubanRadioPlugin(object):
     @common.threaded
-    def __init__(self, exaile, username ,password):
-        
+    def __init__(self, exaile):
+        self.exaile = exaile        
+        ## mark if a track is skipped instead of end normally
+        self.skipped = False
+        self.pre_init()
+
+    def pre_init(self):
+        self.__create_pre_init_menu_item()
+
+    def do_init(self, *args):
+        username = settings.get_option("plugin/douban_radio/username")  
+        password = settings.get_option("plugin/douban_radio/password")
         self.doubanfm = DoubanFM(username, password)
         self.channels = self.doubanfm.channels
 
-        self.exaile = exaile
         self.__create_menu_item__()
 
         self.check_to_enable_dbus()
@@ -87,10 +95,6 @@ class DoubanRadioPlugin(object):
         self.doubanfm_mode = DoubanFMMode(self.exaile, self)
         self.doubanfm_cover = DoubanFMCover()
         providers.register('covers', self.doubanfm_cover)
-
-        ## mark if a track is skipped instead of end normally
-        self.skipped = False
-
 
     @staticmethod
     def __translate_channels():
@@ -299,6 +303,9 @@ class DoubanRadioPlugin(object):
 
     def __create_menu_item__(self):
         exaile = self.exaile
+
+        if self.preInitMenuItem is not None:
+            exaile.gui.builder.get_object('file_menu').remove(self.preInitMenuItem)
         
         self.menuItem = gtk.MenuItem(_('Open Douban.fm'))
         menu = gtk.Menu()
@@ -326,6 +333,12 @@ class DoubanRadioPlugin(object):
         self.modeMenuItem.connect('activate', self.show_mode)
         exaile.gui.builder.get_object('view_menu').append(self.modeMenuItem)
         self.modeMenuItem.show()
+
+    def __create_pre_init_menu_item(self):
+        self.preInitMenuItem = gtk.MenuItem(_('Connect to Douban.fm'))
+        self.preInitMenuItem.connect('activate', self.do_init)
+        self.preInitMenuItem.show()
+        self.exaile.gui.builder.get_object('file_menu').insert(self.preInitMenuItem, 5)
     
     def create_track_from_douban_song(self, song):
         track = Track(song.url)
