@@ -41,10 +41,6 @@ class PasswordPreference(widgets.Preference):
     default = ''
     name = 'plugin/douban_radio/password'
 
-class RecommandPreference(widgets.Preference):
-    default = '$artist: $title - $album'
-    name = 'plugin/douban_radio/rcm_tpl'
-
 class DBusIndicatorPreference(widgets.CheckPreference):
     default = False
     name = 'plugin/douban_radio/dbus_indicator'
