@@ -28,6 +28,7 @@ from libdoubanfm import DoubanFM, DoubanTrack, DoubanLoginException
 from doubanfm_mode import DoubanFMMode
 from doubanfm_cover import DoubanFMCover
 from doubanfm_dbus import DoubanFMDBusController
+from captcha_dialog import CaptchaDialog
 
 import dbfm_pref
 
@@ -79,18 +80,25 @@ class DoubanRadioPlugin(object):
         self.pre_init()
 
     def pre_init(self):
+        self.captcha_dialog = None
         self.__create_pre_init_menu_item()
 
-    def do_init(self, *args):
+    def do_init(self, captcha_id=None, captcha_solution=None):
         username = settings.get_option("plugin/douban_radio/username")  
         password = settings.get_option("plugin/douban_radio/password")
         try:
-            self.doubanfm = DoubanFM(username, password)
+            self.doubanfm = DoubanFM(username, password, captcha_id, captcha_solution)
         except DoubanLoginException as e:
-            self.exaile.gui.main.message.show_error(
-                _('Douban FM Error'),
-                _('Failed to login to douban.fm with your credential'))
-            return
+            if e.data['captcha_id'] is None:
+                self.exaile.gui.main.message.show_error(
+                    _('Douban FM Error'),
+                    _('Failed to login to douban.fm with your credential'))
+                return 
+            else:
+                captcha_id = e.data['captcha_id']
+                self.show_captcha_dialog(captcha_id)
+                return
+            
         self.channels = self.doubanfm.channels
 
         self.__create_menu_item__()
@@ -101,6 +109,14 @@ class DoubanRadioPlugin(object):
         self.doubanfm_mode = DoubanFMMode(self.exaile, self)
         self.doubanfm_cover = DoubanFMCover()
         providers.register('covers', self.doubanfm_cover)
+
+    def show_captcha_dialog(self, captcha_id):
+        if self.captcha_dialog is None:
+            self.captcha_dialog = CaptchaDialog(self)
+
+        captcha_url = "http://www.douban.com/misc/captcha?id=%s&amp;size=s" % captcha_id
+        self.captcha_dialog.set_captcha(captcha_id, captcha_url)
+        self.captcha_dialog.show()        
 
     @staticmethod
     def __translate_channels():
@@ -342,7 +358,7 @@ class DoubanRadioPlugin(object):
 
     def __create_pre_init_menu_item(self):
         self.preInitMenuItem = gtk.MenuItem(_('Connect to Douban.fm'))
-        self.preInitMenuItem.connect('activate', self.do_init)
+        self.preInitMenuItem.connect('activate', lambda e:self.do_init())
         self.preInitMenuItem.show()
         self.exaile.gui.builder.get_object('file_menu').insert(self.preInitMenuItem, 5)
     

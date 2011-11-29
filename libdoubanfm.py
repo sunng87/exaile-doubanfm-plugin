@@ -1,4 +1,4 @@
-# -*- coding: UTF8 -*-
+# -*- coding: utf-8 -*-
 # Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -55,19 +55,22 @@ class DoubanTrack(object):
             return None
 
 class DoubanLoginException(Exception):
-    pass
+    def __init__(self, **kwargs):
+        self.data = kwargs
+
 
 class DoubanFM(object):
-    def __init__ (self, username, password):
+    def __init__ (self, username, password, captcha_id=None, captcha_solution=None):
         """Initialize a douban.fm session.
         * username - the user's email on douban.com
         * password - the user's password on douban.com
         """
+
         self.uid = None
         self.dbcl2 = None
         self.bid = None
         self._channel = 0
-        self.__login(username, password)
+        self.__login(username, password, captcha_id, captcha_solution)
         self.__load_channels()
 
     def __load_channels(self):
@@ -91,13 +94,18 @@ class DoubanFM(object):
         """
         self._channel = value
 
-    def __login(self, username, password):
+    def __login(self, username, password, captcha_id=None, captcha_solution=None):
         """
         login douban, get the session token
         """
-        self.__get_login_data()
-        data = urllib.urlencode({'source':'simple', 
-                'form_email':username, 'form_password':password})
+        if self.bid is None:
+            self.__get_login_data()
+        login_form = {'source':'simple', 
+                'form_email':username, 'form_password':password}
+        if captcha_id is not None:
+            login_form['captcha-id'] = captcha_id
+            login_form['captcha-solution'] = captcha_solution
+        data = urllib.urlencode(login_form)
         contentType = "application/x-www-form-urlencoded"
 
         cookie = 'bid="%s"' % self.bid
@@ -110,7 +118,13 @@ class DoubanFM(object):
             resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
 
             if not resultCookie.has_key('dbcl2'):
-                raise DoubanLoginException()
+                data = {}
+                redir = r1.getheader('location')
+                if redir:
+                    redir_page = urllib.urlopen(redir).read()
+                    captcha_data = self.__check_login_captcha(redir_page)
+                    data['captcha_id'] = captcha_data
+                raise DoubanLoginException(**data)
 
             dbcl2 = resultCookie['dbcl2'].value
             if dbcl2 is not None and len(dbcl2) > 0:
@@ -118,6 +132,14 @@ class DoubanFM(object):
         
                 uid = self.dbcl2.split(':')[0]
                 self.uid = uid
+
+    def __check_login_captcha(self, webpage):
+        captcha_re = re.compile(r'captcha\?id=([\w\d]+?)&amp;')
+        finder = captcha_re.search(webpage)
+        if finder:
+            return finder.group(1)
+        else:
+            return None
     
     def __get_login_data(self):
         conn = httplib.HTTPConnection("www.douban.com")
