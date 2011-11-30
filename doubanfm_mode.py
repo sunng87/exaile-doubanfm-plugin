@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 # Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -239,7 +239,7 @@ class DoubanFMMode():
         album = track.get_tag_raw('album')[0]
         title = track.get_tag_raw('title')[0]
 
-        self.window.set_title(u"\u8c46\u74e3FM %s - %s Exaile" % (title, artist))
+        self.window.set_title(u"Exaile \u8c46\u74e3FM %s - %s" % (title, artist))
         self.track_title_label.set_label("%s - %s" %(title, artist))
         self.track_info_label.set_label(album)
         
