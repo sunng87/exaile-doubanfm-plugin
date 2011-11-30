@@ -46,7 +46,7 @@ class DoubanTrack(object):
         return "%sg%sg0" % (self.sid, self.ssid)
 
     def get_uri(self):
-        return "http://douban.fm/?start=%s" % (self.get_start_value())
+        return "http://douban.fm/?start=%s&cid=0" % (self.get_start_value())
 
     def __getattr__(self, name):
         if name in self.props:

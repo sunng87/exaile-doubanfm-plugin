@@ -69,7 +69,7 @@ SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl
         'sina': "http://v.t.sina.com.cn/share/share.php?appkey=3015934887&url=%s&title=%s&source=&sourceUrl=&content=utf-8&pic=%s",
         'twitter': "http://twitter.com/share?text=%s&url=%s",
         'fanfou': "http://fanfou.com/sharer?u=%s&t=%s&d=&s=bm",
-        'douban': "http://www.douban.com/recommend/?url=%s"}
+        'douban': "http://shuo.douban.com/!service/share?name=%s&href=%s&image=%s&text=&desc=(%s)&apikey=0ace3f74eb3bd5d8206abe5ec1b38188"}
 
 class DoubanRadioPlugin(object):
     @common.threaded
@@ -249,7 +249,7 @@ class DoubanRadioPlugin(object):
             p = templ % tuple(map(urllib.quote_plus, [track.get_uri(), title.encode('utf8')]))
             return p
         if target == 'douban':
-            p = templ % tuple(map(urllib.quote_plus, [track.get_uri()]))
+            p = templ % tuple(map(urllib.quote_plus, [track.title.encode('utf8'),track.get_uri(), track.picture, "Exaile DoubanFM Plugin"]))
             return p
 
     def get_tracks_remain(self):
