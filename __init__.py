@@ -83,6 +83,7 @@ class DoubanRadioPlugin(object):
         self.captcha_dialog = None
         self.__create_pre_init_menu_item()
 
+    @common.threaded
     def do_init(self, captcha_id=None, captcha_solution=None):
         username = settings.get_option("plugin/douban_radio/username")  
         password = settings.get_option("plugin/douban_radio/password")
