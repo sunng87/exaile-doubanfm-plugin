@@ -160,15 +160,16 @@ class DoubanRadioPlugin(object):
     def load_more_tracks(self, songs):
         tracks = map(self.create_track_from_douban_song, songs)
         playlist = self.get_current_playlist()
+        
+        #print self.get_tracks_remain()
 
-#        if self.get_tracks_remain() > 15:
-#            for i in range(len(tracks)):
-#                ## just a walk around
-#                time.sleep(1)
-#
-#                playlist.remove(len(playlist)-1)
+        #if self.get_tracks_remain() > 5:
+        #    start = self.get_current_pos()+4
+        #    end = len(playlist)-1
+        #    playlist.remove_tracks(start, end)
+                        
 
-        if self.get_tracks_remain() < 15:
+        if self.get_tracks_remain() < 5:
             playlist.add_tracks(tracks)
             
 
