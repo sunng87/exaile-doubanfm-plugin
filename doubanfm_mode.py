@@ -35,7 +35,7 @@ import urllib
 
 from xl import xdg, event, settings
 from xlgui import cover, guiutil, tray
-from xlgui.main import PlaybackProgressBar
+from xlgui.widgets.playback import PlaybackProgressBar
 from xlgui.widgets import info
 from xl.nls import gettext as _
 

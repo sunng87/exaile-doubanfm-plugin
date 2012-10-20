@@ -329,7 +329,7 @@ class DoubanRadioPlugin(object):
         exaile = self.exaile
 
         if self.preInitMenuItem is not None:
-            exaile.gui.builder.get_object('file_menu').remove(self.preInitMenuItem)
+            self.get_menu('menubar-file-menu').remove(self.preInitMenuItem)
         
         self.menuItem = gtk.MenuItem(_('Open Douban.fm'))
         menu = gtk.Menu()
@@ -345,7 +345,7 @@ class DoubanRadioPlugin(object):
 
 #       self.menu.connect('activate', self.active_douban_radio, self.exaile)
 
-        exaile.gui.builder.get_object('file_menu').insert(self.menuItem, 5)
+        self.get_menu('menubar-file-menu').insert(self.menuItem, 5)
 
         self.menuItem.show()
 
@@ -355,14 +355,14 @@ class DoubanRadioPlugin(object):
         self.modeMenuItem.add_accelerator('activate', self.accels, key, modifier, gtk.ACCEL_VISIBLE)
         self.exaile.gui.main.window.add_accel_group(self.accels)
         self.modeMenuItem.connect('activate', self.show_mode)
-        exaile.gui.builder.get_object('view_menu').append(self.modeMenuItem)
+        self.get_menu('view_menu').append(self.modeMenuItem)
         self.modeMenuItem.show()
 
     def __create_pre_init_menu_item(self):
         self.preInitMenuItem = gtk.MenuItem(_('Connect to Douban.fm'))
         self.preInitMenuItem.connect('activate', lambda e:self.do_init())
         self.preInitMenuItem.show()
-        self.exaile.gui.builder.get_object('file_menu').insert(self.preInitMenuItem, 5)
+        self.get_menu('menubar-file-menu').insert(self.preInitMenuItem, 5)
     
     def create_track_from_douban_song(self, song):
         track = Track(song.url)
@@ -436,9 +436,9 @@ class DoubanRadioPlugin(object):
         try:
             providers.unregister('covers', self.doubanfm_cover)
             if self.menuItem :
-                exaile.gui.builder.get_object('file_menu').remove(self.menuItem)
+                self.get_menu('menubar-file-menu').remove(self.menuItem)
             if self.modeMenuItem:
-                exaile.gui.builder.get_object('view_menu').remove(self.modeMenuItem)
+                self.get_menu('menubar-view-menu').remove(self.modeMenuItem)
                 exaile.gui.main.remove_accel_group(self.accels)
             self.__unregister_events()
 
@@ -450,6 +450,9 @@ class DoubanRadioPlugin(object):
                 self.dbus_controller.release_dbus()
         except:
             pass
+
+    def get_menu(self, menu_id):
+        return providers.get(menu_id)
 
     def check_to_enable_dbus(self):
         if settings.get_option('plugin/douban_radio/dbus_indicator'):
