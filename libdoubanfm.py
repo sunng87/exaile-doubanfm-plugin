@@ -74,7 +74,7 @@ class DoubanFM(object):
         self.__load_channels()
 
     def __load_channels(self):
-        f = urllib.urlopen('http://www.douban.com/j/app/radio/channels')
+        f = urllib.urlopen('http://www.douban.com/j/app/radio/channels?version=100&app_name=radio_desktop_win')
         data = f.read()
         f.close()
         channels = json.loads(data)

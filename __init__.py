@@ -326,43 +326,33 @@ class DoubanRadioPlugin(object):
                 retry += 1
 
     def __create_menu_item__(self):
-        exaile = self.exaile
+        providers.unregister('menubar-file-menu',self.premenu)
 
-        if self.preInitMenuItem is not None:
-            self.get_menu('menubar-file-menu').remove(self.preInitMenuItem)
-        
-        self.menuItem = gtk.MenuItem(_('Open Douban.fm'))
-        menu = gtk.Menu()
-        self.menuItem.set_submenu(menu)
-
+        self.menu=gtk.Menu()
         for channel_name  in self.channels.keys():
             menuItem = gtk.MenuItem(_(channel_name))
 
             menuItem.connect('activate', self.active_douban_radio, self.channels[channel_name])
-            
-            menu.prepend(menuItem)
+            self.menu.append(menuItem)
             menuItem.show()
+        self.premenu=menu.simple_menu_item('Open Douban.fm',[],_('_Open Douban.fm'),
+                                           None, None,[],self.menu)
+        providers.register('menubar-file-menu',self.premenu)
 
-#       self.menu.connect('activate', self.active_douban_radio, self.exaile)
-
-        self.get_menu('menubar-file-menu').insert(self.menuItem, 5)
-
-        self.menuItem.show()
-
-        self.modeMenuItem = gtk.MenuItem(_('DoubanFM mode'))
-        key, modifier = gtk.accelerator_parse('<Control>D')
-        self.accels = gtk.AccelGroup()
-        self.modeMenuItem.add_accelerator('activate', self.accels, key, modifier, gtk.ACCEL_VISIBLE)
-        self.exaile.gui.main.window.add_accel_group(self.accels)
-        self.modeMenuItem.connect('activate', self.show_mode)
-        self.get_menu('view_menu').append(self.modeMenuItem)
-        self.modeMenuItem.show()
+        #self.modeMenuItem = gtk.MenuItem(_('DoubanFM mode'))
+        #key, modifier = gtk.accelerator_parse('<Control>D')
+        #self.accels = gtk.AccelGroup()
+        #self.modeMenuItem.add_accelerator('activate', self.accels, key, modifier, gtk.ACCEL_VISIBLE)
+        #self.exaile.gui.main.window.add_accel_group(self.accels)
+        #self.modeMenuItem.connect('activate', self.show_mode)
+        #self.get_menu('view_menu').append(self.modeMenuItem)
+        #self.modeMenuItem.show()
 
     def __create_pre_init_menu_item(self):
-        self.preInitMenuItem = gtk.MenuItem(_('Connect to Douban.fm'))
-        self.preInitMenuItem.connect('activate', lambda e:self.do_init())
-        self.preInitMenuItem.show()
-        self.get_menu('menubar-file-menu').insert(self.preInitMenuItem, 5)
+        self.premenu=menu.simple_menu_item('Connect to Douban.fm',[],_('_Connect to Douban.fm'),
+                                           gtk.STOCK_ADD, lambda e,r,t,y:self.do_init())
+        providers.register('menubar-file-menu',self.premenu)
+
     
     def create_track_from_douban_song(self, song):
         track = Track(song.url)
