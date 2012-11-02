@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
+# Copyrigh (C) 2008-2011 Sun Ning <classicning@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ from xl import common, event, main, playlist, xdg, settings, trax, providers
 from xl.radio import *
 from xl.nls import gettext as _
 from xl.trax import Track
-from xlgui import guiutil
+from xlgui import guiutil, playlist
 from xlgui.accelerators import Accelerator
-from xlgui.widgets import menu, menuitems, dialogs
+from xlgui.widgets import menu, menuitems, dialogs, playlist, notebook
 
 
 DOUBANFM = None
@@ -161,10 +161,9 @@ class DoubanRadioPlugin(object):
 
     def load_more_tracks(self, songs):
         tracks = map(self.create_track_from_douban_song, songs)
+        print "load more tracks"
         playlist = self.get_current_playlist()
         
-        #print self.get_tracks_remain()
-
         #if self.get_tracks_remain() > 5:
         #    start = self.get_current_pos()+4
         #    end = len(playlist)-1
@@ -210,6 +209,7 @@ class DoubanRadioPlugin(object):
         self.load_more_tracks(songs)
 
     def get_rest_sids(self, playlist):
+        print "get rest sids"
         playlist = self.get_current_playlist()
 
         current_tracks = playlist.get_tracks()
@@ -256,15 +256,21 @@ class DoubanRadioPlugin(object):
             return p
 
     def get_tracks_remain(self):
+        print "get tracks remain you"
         pl = self.get_current_playlist()
-        total = len(pl.get_tracks())
-        cursor = pl.get_current_pos()
+        total = pl.count(pl)
+        print "total = ", total
+        cursor = pl.get_current_position()
+        print "cursor = ", cursor
         return total-cursor-1
 
     def get_current_track(self):
+        print "get current track"
         pl = self.get_current_playlist()
         if isinstance(pl, DoubanFMPlaylist):
-            return pl.get_tracks()[pl.get_current_pos()]
+            #return pl.get_tracks()[pl.get_current_pos()]
+            print pl.get_current()
+            return pl.get_current()
         else:
             return None
 
@@ -287,7 +293,12 @@ class DoubanRadioPlugin(object):
                 self.doubanfm.played_song(sid, aid)
 
     def get_current_playlist(self):
-        return self.exaile.gui.main.get_selected_playlist().playlist
+        print "get current playlist"
+        page_num = self.exaile.gui.main.playlist_notebook.get_current_page();
+        page = self.exaile.gui.main.playlist_notebook.get_nth_page(page_num);
+        print page
+        return page.playlist
+#        return self.exaile.gui.main.get_selected_playlist().playlist
 
     def close_playlist(self, type, exaile, data=None):
         removed = 0
@@ -297,12 +308,16 @@ class DoubanRadioPlugin(object):
                 removed += 1
 
     def check_to_load_more(self, type, player, track):
+        print "check to load more"
         playlist = self.get_current_playlist()
+        print "check to load more end"
         if isinstance(playlist, DoubanFMPlaylist):
             ## check if last one
             ## playlist.index(track), len(playlist.get_tracks())
+            print "tracks remain = ", self.get_tracks_remain()
             if self.get_tracks_remain() <= 1:
                 self.load_more(playlist)
+            print "tracks remain = ", self.get_tracks_remain()
 
     def get_history_sids(self, playlist):
         current_tracks = playlist.get_ordered_tracks()
@@ -375,16 +390,17 @@ class DoubanRadioPlugin(object):
         self.doubanfm_mode.show()
 
     def create_playlist(self, name, channel, initial_tracks=[]):
-        plist = DoubanFMPlaylist(name, channel)
-        plist.set_ordered_tracks(initial_tracks)
+        plist = DoubanFMPlaylist(name, channel, initial_tracks)
+        #plist.set_ordered_tracks(initial_tracks)
 
-        plist.set_repeat(False)
-        plist.set_random(False)
-        plist.set_dynamic(False)
+        plist.set_repeat_mode("disabled")
+#        plist.set_random(False)
+        plist.set_dynamic_mode("disabled")
 
         return plist
 
     def get_current_channel(self):
+        print "get current channel"
         return self.get_current_playlist().channel
 
     def active_douban_radio(self, type, channel_id, auto=False):
@@ -403,8 +419,9 @@ class DoubanRadioPlugin(object):
         channel_name = self.channel_id_to_name(channel_id)
         plist = self.create_playlist(
                 'DoubanFM %s' % channel_name, channel_id, tracks)
-        
-        self.exaile.gui.main.add_playlist(plist)
+        print self.exaile
+        self.exaile.gui.main.playlist_notebook.create_tab_from_playlist(plist)
+#        self.exaile.gui.main.add_playlist(plist)
 
         if auto: 
             self._stop()
@@ -461,7 +478,7 @@ class DoubanRadioPlugin(object):
         return None
        
 class DoubanFMPlaylist(playlist.Playlist):
-    def __init__(self, name, channel):
-        playlist.Playlist.__init__(self, name)
-        self.channel = channel
+    def __init__(self, name, channel, initTracks):
+		playlist.Playlist.__init__(self, name, initTracks)
+		self.channel = channel
        
