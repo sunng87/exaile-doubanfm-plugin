@@ -258,18 +258,17 @@ class DoubanRadioPlugin(object):
     def get_tracks_remain(self):
         print "get tracks remain you"
         pl = self.get_current_playlist()
-        total = pl.count(pl)
-        print "total = ", total
+        total = len(pl)
         cursor = pl.get_current_position()
-        print "cursor = ", cursor
         return total-cursor-1
 
     def get_current_track(self):
         print "get current track"
         pl = self.get_current_playlist()
+        print pl
         if isinstance(pl, DoubanFMPlaylist):
             #return pl.get_tracks()[pl.get_current_pos()]
-            print pl.get_current()
+            print "now : ", pl.get_current()
             return pl.get_current()
         else:
             return None
@@ -310,23 +309,29 @@ class DoubanRadioPlugin(object):
     def check_to_load_more(self, type, player, track):
         print "check to load more"
         playlist = self.get_current_playlist()
-        print "check to load more end"
+        print playlist
         if isinstance(playlist, DoubanFMPlaylist):
             ## check if last one
             ## playlist.index(track), len(playlist.get_tracks())
-            print "tracks remain = ", self.get_tracks_remain()
+            print "check to load more : ", playlist
             if self.get_tracks_remain() <= 1:
                 self.load_more(playlist)
-            print "tracks remain = ", self.get_tracks_remain()
 
     def get_history_sids(self, playlist):
-        current_tracks = playlist.get_ordered_tracks()
+        current_tracks = []
+        for i, x in enumerate(playlist):
+            print "index : ", x
+            current_tracks.append(x)
+        print current_tracks
         sids = self.tracks_to_sids(current_tracks)
         return sids
 
     def load_more(self, playlist):
+        print "load more : ", playlist
         sids = self.get_history_sids(playlist)
-        current_sid = self.get_current_track().get_tag_raw('sid')[0]
+        print "load more : ", sids
+        current_sid = sids[playlist.get_current_position()]
+        print current_sid
         retry = 0
         while retry < 1:
             try:
@@ -337,7 +342,8 @@ class DoubanRadioPlugin(object):
             
             if len(songs) > 0:
                 tracks = map(self.create_track_from_douban_song, songs)
-                playlist.add_tracks(tracks)
+                #playlist.add_tracks(tracks)
+                playlist.extend(tracks)
                 break
             else:
                 retry += 1
@@ -416,6 +422,7 @@ class DoubanRadioPlugin(object):
             return
 
         tracks = map(self.create_track_from_douban_song, songs)
+        print "create : ", tracks
         channel_name = self.channel_id_to_name(channel_id)
         plist = self.create_playlist(
                 'DoubanFM %s' % channel_name, channel_id, tracks)
