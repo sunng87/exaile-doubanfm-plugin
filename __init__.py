@@ -161,7 +161,6 @@ class DoubanRadioPlugin(object):
 
     def load_more_tracks(self, songs):
         tracks = map(self.create_track_from_douban_song, songs)
-        print "load more tracks"
         playlist = self.get_current_playlist()
         
         #if self.get_tracks_remain() > 5:
@@ -209,7 +208,6 @@ class DoubanRadioPlugin(object):
         self.load_more_tracks(songs)
 
     def get_rest_sids(self, playlist):
-        print "get rest sids"
         playlist = self.get_current_playlist()
 
         current_tracks = playlist.get_tracks()
@@ -256,19 +254,15 @@ class DoubanRadioPlugin(object):
             return p
 
     def get_tracks_remain(self):
-        print "get tracks remain you"
         pl = self.get_current_playlist()
         total = len(pl)
         cursor = pl.get_current_position()
         return total-cursor-1
 
     def get_current_track(self):
-        print "get current track"
         pl = self.get_current_playlist()
-        print pl
         if isinstance(pl, DoubanFMPlaylist):
             #return pl.get_tracks()[pl.get_current_pos()]
-            print "now : ", pl.get_current()
             return pl.get_current()
         else:
             return None
@@ -292,10 +286,8 @@ class DoubanRadioPlugin(object):
                 self.doubanfm.played_song(sid, aid)
 
     def get_current_playlist(self):
-        print "get current playlist"
         page_num = self.exaile.gui.main.playlist_notebook.get_current_page();
         page = self.exaile.gui.main.playlist_notebook.get_nth_page(page_num);
-        print page
         return page.playlist
 #        return self.exaile.gui.main.get_selected_playlist().playlist
 
@@ -303,35 +295,27 @@ class DoubanRadioPlugin(object):
         removed = 0
         for i,page in enumerate(exaile.gui.main.playlist_notebook):
             if isinstance(page.playlist, DoubanFMPlaylist):
-                exaile.gui.main.close_playlist_tab(i-removed)
+                page.tab.close()
                 removed += 1
 
     def check_to_load_more(self, type, player, track):
-        print "check to load more"
         playlist = self.get_current_playlist()
-        print playlist
         if isinstance(playlist, DoubanFMPlaylist):
             ## check if last one
             ## playlist.index(track), len(playlist.get_tracks())
-            print "check to load more : ", playlist
             if self.get_tracks_remain() <= 1:
                 self.load_more(playlist)
 
     def get_history_sids(self, playlist):
         current_tracks = []
         for i, x in enumerate(playlist):
-            print "index : ", x
             current_tracks.append(x)
-        print current_tracks
         sids = self.tracks_to_sids(current_tracks)
         return sids
 
     def load_more(self, playlist):
-        print "load more : ", playlist
         sids = self.get_history_sids(playlist)
-        print "load more : ", sids
         current_sid = sids[playlist.get_current_position()]
-        print current_sid
         retry = 0
         while retry < 1:
             try:
@@ -406,7 +390,6 @@ class DoubanRadioPlugin(object):
         return plist
 
     def get_current_channel(self):
-        print "get current channel"
         return self.get_current_playlist().channel
 
     def active_douban_radio(self, type, channel_id, auto=False):
@@ -422,11 +405,9 @@ class DoubanRadioPlugin(object):
             return
 
         tracks = map(self.create_track_from_douban_song, songs)
-        print "create : ", tracks
         channel_name = self.channel_id_to_name(channel_id)
         plist = self.create_playlist(
                 'DoubanFM %s' % channel_name, channel_id, tracks)
-        print self.exaile
         self.exaile.gui.main.playlist_notebook.create_tab_from_playlist(plist)
 #        self.exaile.gui.main.add_playlist(plist)
 
