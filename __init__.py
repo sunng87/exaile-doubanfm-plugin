@@ -76,7 +76,7 @@ SHARE_TEMPLATE = {'kaixin001': "http://www.kaixin001.com/repaste/bshare.php?rurl
 class DoubanRadioPlugin(object):
     @common.threaded
     def __init__(self, exaile):
-        self.exaile = exaile        
+        self.exaile = exaile
         ## mark if a track is skipped instead of end normally
         self.skipped = False
         self.pre_init()
@@ -87,7 +87,7 @@ class DoubanRadioPlugin(object):
 
     @common.threaded
     def do_init(self, captcha_id=None, captcha_solution=None):
-        username = settings.get_option("plugin/douban_radio/username")  
+        username = settings.get_option("plugin/douban_radio/username")
         password = settings.get_option("plugin/douban_radio/password")
         try:
             self.doubanfm = DoubanFM(username, password, captcha_id, captcha_solution)
@@ -96,12 +96,12 @@ class DoubanRadioPlugin(object):
                 self.exaile.gui.main.message.show_error(
                     _('Douban FM Error'),
                     _('Failed to login to douban.fm with your credential'))
-                return 
+                return
             else:
                 captcha_id = e.data['captcha_id']
                 self.show_captcha_dialog(captcha_id)
                 return
-            
+
         self.channels = self.doubanfm.channels
 
         self.__create_menu_item__()
@@ -119,7 +119,7 @@ class DoubanRadioPlugin(object):
 
         captcha_url = "http://www.douban.com/misc/captcha?id=%s&amp;size=s" % captcha_id
         self.captcha_dialog.set_captcha(captcha_id, captcha_url)
-        self.captcha_dialog.show()        
+        self.captcha_dialog.show()
 
     @staticmethod
     def __translate_channels():
@@ -162,16 +162,16 @@ class DoubanRadioPlugin(object):
     def load_more_tracks(self, songs):
         tracks = map(self.create_track_from_douban_song, songs)
         playlist = self.get_current_playlist()
-        
+
         #if self.get_tracks_remain() > 5:
         #    start = self.get_current_pos()+4
         #    end = len(playlist)-1
         #    playlist.remove_tracks(start, end)
-                        
+
 
         if self.get_tracks_remain() < 5:
             playlist.add_tracks(tracks)
-            
+
 
     @common.threaded
     def mark_as_like(self, track):
@@ -214,7 +214,7 @@ class DoubanRadioPlugin(object):
         rest_tracks = current_tracks[playlist.get_current_pos()+1:]
         rest_sids = self.tracks_to_sids(rest_tracks)
         return rest_sids
-        
+
     def share(self, target, track):
         if target not in SHARE_TEMPLATE:
             return None
@@ -323,7 +323,7 @@ class DoubanRadioPlugin(object):
             except:
                 retry += 1
                 continue
-            
+
             if len(songs) > 0:
                 tracks = map(self.create_track_from_douban_song, songs)
                 #playlist.add_tracks(tracks)
@@ -355,12 +355,16 @@ class DoubanRadioPlugin(object):
         #self.get_menu('view_menu').append(self.modeMenuItem)
         #self.modeMenuItem.show()
 
+        self.modemenu=menu.simple_menu_item('DoubanFM Mode',[],_('_DoubanFM Mode'),
+                                            gtk.STOCK_FULLSCREEN,self.show_mode)
+        providers.register('menubar-view-menu',self.modemenu)
+
     def __create_pre_init_menu_item(self):
         self.premenu=menu.simple_menu_item('Connect to Douban.fm',[],_('_Connect to Douban.fm'),
                                            gtk.STOCK_ADD, lambda e,r,t,y:self.do_init())
         providers.register('menubar-file-menu',self.premenu)
 
-    
+
     def create_track_from_douban_song(self, song):
         track = Track(song.url)
         track.set_tag_raw('sid', song.sid)
@@ -411,9 +415,9 @@ class DoubanRadioPlugin(object):
         self.exaile.gui.main.playlist_notebook.create_tab_from_playlist(plist)
 #        self.exaile.gui.main.add_playlist(plist)
 
-        if auto: 
+        if auto:
             self._stop()
-            self._play()            
+            self._play()
 
     def _stop(self):
         self.exaile.player.stop()
@@ -464,9 +468,9 @@ class DoubanRadioPlugin(object):
             if v == channel_id:
                 return k
         return None
-       
+
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name, channel, initTracks):
 		playlist.Playlist.__init__(self, name, initTracks)
 		self.channel = channel
-       
+
