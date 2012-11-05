@@ -109,9 +109,11 @@ class DoubanRadioPlugin(object):
         self.check_to_enable_dbus()
 
         self.__register_events()
-        self.doubanfm_mode = DoubanFMMode(self.exaile, self)
+
         self.doubanfm_cover = DoubanFMCover()
         providers.register('covers', self.doubanfm_cover)
+
+        self.doubanfm_mode = DoubanFMMode(self.exaile, self)
 
     def show_captcha_dialog(self, captcha_id):
         if self.captcha_dialog is None:
@@ -471,6 +473,6 @@ class DoubanRadioPlugin(object):
 
 class DoubanFMPlaylist(playlist.Playlist):
     def __init__(self, name, channel, initTracks):
-		playlist.Playlist.__init__(self, name, initTracks)
-		self.channel = channel
+        playlist.Playlist.__init__(self, name, initTracks)
+        self.channel = channel
 
