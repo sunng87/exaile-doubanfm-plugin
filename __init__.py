@@ -348,23 +348,20 @@ class DoubanRadioPlugin(object):
                                            None, None,[],self.menu)
         providers.register('menubar-file-menu',self.premenu)
 
-        #self.modeMenuItem = gtk.MenuItem(_('DoubanFM mode'))
-        #key, modifier = gtk.accelerator_parse('<Control>D')
-        #self.accels = gtk.AccelGroup()
-        #self.modeMenuItem.add_accelerator('activate', self.accels, key, modifier, gtk.ACCEL_VISIBLE)
-        #self.exaile.gui.main.window.add_accel_group(self.accels)
-        #self.modeMenuItem.connect('activate', self.show_mode)
-        #self.get_menu('view_menu').append(self.modeMenuItem)
-        #self.modeMenuItem.show()
-
         self.modemenu=menu.simple_menu_item('DoubanFM Mode',[],_('_DoubanFM Mode'),
-                                            gtk.STOCK_FULLSCREEN,self.show_mode)
+                                            gtk.STOCK_FULLSCREEN,self.show_mode,
+                                            accelerator='<Control>D')
+        self.accelerator_mode = Accelerator('<Control>D',self.show_mode)
         providers.register('menubar-view-menu',self.modemenu)
+        providers.register('mainwindow-accelerators', self.accelerator_mode)
 
     def __create_pre_init_menu_item(self):
         self.premenu=menu.simple_menu_item('Connect to Douban.fm',[],_('_Connect to Douban.fm'),
-                                           gtk.STOCK_ADD, lambda e,r,t,y:self.do_init())
+                                           gtk.STOCK_ADD, lambda e,r,t,y:self.do_init(),
+                                           accelerator='<Control>C')
+        self.accelerator_pre = Accelerator('<Control>C',lambda e,r,t,y:self.do_init())
         providers.register('menubar-file-menu',self.premenu)
+        providers.register('mainwindow-accelerators', self.accelerator_pre)
 
 
     def create_track_from_douban_song(self, song):
