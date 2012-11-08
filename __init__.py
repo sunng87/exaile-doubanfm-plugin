@@ -41,7 +41,7 @@ from xl import common, event, main, playlist, xdg, settings, trax, providers
 from xl.radio import *
 from xl.nls import gettext as _
 from xl.trax import Track
-from xlgui import guiutil, playlist
+from xlgui import guiutil
 from xlgui.accelerators import Accelerator
 from xlgui.widgets import menu, menuitems, dialogs, playlist, notebook
 

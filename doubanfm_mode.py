@@ -33,10 +33,10 @@ import os
 
 import urllib
 
-from xl import xdg, event, settings
-from xlgui import cover, guiutil, tray
+from xl import xdg, event, settings, player
+from xlgui import cover, tray
 from xlgui.widgets.playback import PlaybackProgressBar
-from xlgui.widgets import info
+from xlgui.widgets import info, playback
 from xl.nls import gettext as _
 
 from libdoubanfm import DoubanTrack
@@ -79,12 +79,12 @@ class DoubanFMMode():
 
         volume = settings.get_option('player/volume', 1)
 
-        self.volume_control = guiutil.VolumeControl()
+        self.volume_control = playback.VolumeControl(player.PLAYER)
         self.builder.get_object('hbox2').pack_start(self.volume_control)
 
         self.cover_box = self.builder.get_object('cover_eventbox1')
-        self.info_area = info.TrackInfoPane(auto_update=True)
-        self.cover = cover.CoverWidget(self.cover_box)
+        self.info_area = info.TrackInfoPane(player.PLAYER)
+        self.cover = cover.CoverWidget(self.cover_box,player.PLAYER)
 #        self.cover_box.add(self.cover)
 
         self.track_title_label = self.builder.get_object('track_title_label')
@@ -115,18 +115,16 @@ class DoubanFMMode():
             self.recmd_menuitem,
         ]
 
-        progress_box = self.builder.get_object('playback_progressbar')
-        self.progress_bar = PlaybackProgressBar(
-            progress_box, self.exaile.player
-        )
+        self.progress_bar = playback.PlaybackProgressBar(player.PLAYER)
+        self.builder.get_object('vbox2').pack_start(self.progress_bar)
 
         self.visible = False
         self.active = False
 
         self._build_channel_menu()
 
-        event.add_callback(self.on_playback_start, 'playback_track_start', self.exaile.player)
-        event.add_callback(self.on_playback_stop, 'playback_track_end', self.exaile.player)
+        event.add_callback(self.on_playback_start, 'playback_track_start', player.PLAYER)
+        event.add_callback(self.on_playback_stop, 'playback_track_end', player.PLAYER)
         event.add_callback(self.on_tag_update, 'track_tags_changed')
         self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
 
@@ -144,7 +142,7 @@ class DoubanFMMode():
 
             menuItem.connect('toggled', self.on_channel_group_change,
                     self.dbfm_plugin.channels[channel_name])
-            
+
             menu.prepend(menuItem)
             menuItem.show()
 
@@ -242,7 +240,7 @@ class DoubanFMMode():
         self.window.set_title(u"Exaile \u8c46\u74e3FM %s - %s" % (title, artist))
         self.track_title_label.set_label("%s - %s" %(title, artist))
         self.track_info_label.set_label(album)
-        
+
         if track.get_tag_raw('fav')[0] == "1":
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
@@ -252,7 +250,7 @@ class DoubanFMMode():
 
         self.sensitive(True)
 
-        ## recent change from official client, you can only trash 
+        ## recent change from official client, you can only trash
         ## song in personal channel
         self.trash_button.set_sensitive(self.dbfm_plugin.get_current_channel() == 0)
 
@@ -272,7 +270,7 @@ class DoubanFMMode():
             w.set_sensitive(enable)
 
     def on_button_setting_clicked(self, *e):
-        os.popen(' '.join(['xdg-open', 'http://douban.fm/mine']))	
+        os.popen(' '.join(['xdg-open', 'http://douban.fm/mine']))
 
     def on_button_album_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
@@ -332,7 +330,7 @@ class DoubanFMMode():
         track = self.dbfm_plugin.get_current_track()
         url = self.dbfm_plugin.share('douban', track)
         os.popen(' '.join(['xdg-open', '"%s"'%url]))
-        
+
     def on_channel_group_change(self, item, data):
         channel_id = data
 
@@ -342,7 +340,7 @@ class DoubanFMMode():
         self.show()
 
     def on_pausebutton_toggled(self, btn):
-        self.exaile.player.toggle_pause()
+        player.PLAYER.toggle_pause()
         if btn.get_active():
             ## switch to play icon
             self.pause_button.set_image(
