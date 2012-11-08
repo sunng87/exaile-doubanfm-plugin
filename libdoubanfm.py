@@ -74,14 +74,15 @@ class DoubanFM(object):
         self.__load_channels()
 
     def __load_channels(self):
-        f = urllib.urlopen('http://www.douban.com/j/app/radio/channels?version=100&app_name=radio_desktop_win')
+        f = urllib.urlopen('http://www.douban.com/j/app/radio/channels')
+        #f = urllib.urlopen('http://www.douban.com/j/app/radio/channels?version=100&app_name=radio_desktop_win')
         data = f.read()
         f.close()
         channels = json.loads(data)
         self.channels = {}
         for channel in channels['channels']:
             self.channels[channel['name_en']] = channel['channel_id']
-    
+
     @property
     def channel(self):
         """ current channel """
@@ -89,7 +90,7 @@ class DoubanFM(object):
 
     @channel.setter
     def channel(self, value):
-        """ setter for current channel 
+        """ setter for current channel
         * value - channel id, **not channel name**
         """
         self._channel = value
@@ -100,7 +101,7 @@ class DoubanFM(object):
         """
         if self.bid is None:
             self.__get_login_data()
-        login_form = {'source':'simple', 
+        login_form = {'source':'simple',
                 'form_email':username, 'form_password':password}
         if captcha_id is not None:
             login_form['captcha-id'] = captcha_id
@@ -113,7 +114,7 @@ class DoubanFM(object):
         headers = {"Content-Type":contentType, "Cookie": cookie }
         with contextlib.closing(httplib.HTTPSConnection("www.douban.com")) as conn:
             conn.request("POST", "/accounts/login", data, headers)
-        
+
             r1 = conn.getresponse()
             resultCookie = SimpleCookie(r1.getheader('Set-Cookie'))
 
@@ -129,7 +130,7 @@ class DoubanFM(object):
             dbcl2 = resultCookie['dbcl2'].value
             if dbcl2 is not None and len(dbcl2) > 0:
                 self.dbcl2 = dbcl2
-        
+
                 uid = self.dbcl2.split(':')[0]
                 self.uid = uid
 
@@ -140,7 +141,7 @@ class DoubanFM(object):
             return finder.group(1)
         else:
             return None
-    
+
     def __get_login_data(self):
         conn = httplib.HTTPConnection("www.douban.com")
         conn.request("GET", "/")
@@ -166,7 +167,7 @@ class DoubanFM(object):
                 return ''.join(map(lambda s: '|'+str(s)+':'+str(verb), sidlist))
             else:
                 return ''.join(map(lambda s: '|'+str(s), sidlist))
-   
+
     def __get_default_params (self, typename=None):
         """
         default request parameters, for override
@@ -204,7 +205,7 @@ class DoubanFM(object):
 
     def json_to_douban_tracks(self, item):
         return DoubanTrack(**item)
-            
+
     def new_playlist(self, history=[]):
         """
         retrieve a new playlist
@@ -216,7 +217,7 @@ class DoubanFM(object):
         results = self.__remote_fm(params)
 
         return map(self.json_to_douban_tracks, json.loads(results)['song'])
-                
+
     def del_song(self, sid, aid, rest=[]):
         """
         delete a song from your playlist
@@ -268,7 +269,7 @@ class DoubanFM(object):
         params['h'] = self.__format_list(history[:50])
         params['sid'] = sid
         params['aid'] = aid
-    
+
         results = self.__remote_fm(params)
         return map(self.json_to_douban_tracks, json.loads(results)['song'])
 
@@ -294,12 +295,12 @@ class DoubanFM(object):
         params = self.__get_default_params('p')
         params['h'] = self.__format_list(history[:50])
         params['sid'] = sid
-        
+
         results = self.__remote_fm(params)
         return map(self.json_to_douban_tracks, json.loads(results)['song'])
 
 #### recommand related
-            
+
     def __parse_ck(self, content):
         """parse ck from recommend form"""
         prog = re.compile(r'name=\\"ck\\" value=\\"([\w\d]*?)\\"')
@@ -307,11 +308,11 @@ class DoubanFM(object):
         if finder:
             return finder.group(1)
         return None
-            
+
     def recommend(self, uid, comment, title=None, t=None, ck=None):
         """recommend a uid with some comment. ck is optional, if
         not provided, we will try to fetch a ck."""
-        
+
         t = t or 'W'
         if ck is None:
         ## get recommend ck
@@ -321,12 +322,12 @@ class DoubanFM(object):
                 conn.request('GET', url, None, {'Cookie': cookie})
                 result = conn.getresponse().read()
                 ck = self.__parse_ck(result)
-                
+
         if ck:
             post = {'ck':ck, 'comment':comment, 'novote':1, 'type':t, 'uid':uid}
             if title:
                 post['title'] = title
-            
+
             ## convert unicode chars to bytes
             data = urllib.urlencode(post)
             ## ck ?
@@ -335,7 +336,7 @@ class DoubanFM(object):
             content_type= 'application/x-www-form-urlencoded; charset=UTF-8'
             header = {"Cookie": cookie, "Accept": accept,
                     "Content-Type":content_type, }
-                    
+
             with contextlib.closing(httplib.HTTPConnection("www.douban.com")) as conn:
                 conn.request('POST', "/j/recommend", data, header)
                 conn.getresponse().read()
