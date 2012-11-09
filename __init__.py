@@ -206,6 +206,7 @@ class DoubanRadioPlugin(object):
         #self.exaile.gui.main.queue.next()
         player.QUEUE.next()
 
+
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
         songs = self.doubanfm.del_song(sid, aid, rest=rest_sids)
@@ -442,7 +443,7 @@ class DoubanRadioPlugin(object):
         #    if track:
         #        pl.playlist.set_current_pos((pl.playlist.index(track)))
 
-        # set to play the first song in playlist 
+        # set to play the first song in playlist
         pl.playlist.set_current_position(-1)
         player.QUEUE.play()
 
