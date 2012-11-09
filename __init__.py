@@ -37,7 +37,8 @@ import time
 import urllib
 from string import Template
 
-from xl import common, event, main, playlist, xdg, settings, trax, providers
+
+from xl import common, event, main, playlist, xdg, settings, trax, providers, player
 from xl.radio import *
 from xl.nls import gettext as _
 from xl.trax import Track
@@ -154,7 +155,8 @@ class DoubanRadioPlugin(object):
         rest_sids = self.get_rest_sids(playlist)
 
         ## play next song
-        self.exaile.gui.main.queue.next()
+        #self.exaile.gui.main.QUEUE.next()
+        player.QUEUE.next()
 
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
@@ -212,8 +214,9 @@ class DoubanRadioPlugin(object):
     def get_rest_sids(self, playlist):
         playlist = self.get_current_playlist()
 
-        current_tracks = playlist.get_tracks()
-        rest_tracks = current_tracks[playlist.get_current_pos()+1:]
+        #current_tracks = playlist.get_tracks()
+        current_tracks = self.get_tracks(playlist)
+        rest_tracks = current_tracks[playlist.get_current_position()+1:]
         rest_sids = self.tracks_to_sids(rest_tracks)
         return rest_sids
 
@@ -308,12 +311,17 @@ class DoubanRadioPlugin(object):
             if self.get_tracks_remain() <= 1:
                 self.load_more(playlist)
 
-    def get_history_sids(self, playlist):
+    def get_tracks(self, playlist):
         current_tracks = []
         for i, x in enumerate(playlist):
             current_tracks.append(x)
+        return current_tracks
+
+    def get_history_sids(self, playlist):
+        current_tracks = self.get_tracks(playlist)
         sids = self.tracks_to_sids(current_tracks)
         return sids
+
 
     def load_more(self, playlist):
         sids = self.get_history_sids(playlist)
@@ -419,18 +427,22 @@ class DoubanRadioPlugin(object):
             self._play()
 
     def _stop(self):
-        self.exaile.player.stop()
+        player.PLAYER.stop()
 
     def _play(self):
         ## ref xlgui.main.on_playpause_button_clicked
         guimain = self.exaile.gui.main
         pl = guimain.get_selected_playlist()
-        guimain.queue.set_current_playlist(pl.playlist)
-        if pl:
-            track = pl.get_selected_track()
-            if track:
-                pl.playlist.set_current_pos((pl.playlist.index(track)))
-        guimain.queue.play()
+        #guimain.queue.set_current_playlist(pl.playlist)
+        player.QUEUE.set_current_playlist(pl.playlist)
+        #if pl:
+        #    track = pl.get_selected_track()
+        #    if track:
+        #        pl.playlist.set_current_pos((pl.playlist.index(track)))
+
+        # set to play the first song in playlist 
+        pl.playlist.set_current_position(-1)
+        player.QUEUE.play()
 
     def destroy(self, exaile):
         try:
