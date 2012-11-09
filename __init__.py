@@ -174,7 +174,8 @@ class DoubanRadioPlugin(object):
 
 
         if self.get_tracks_remain() < 5:
-            playlist.add_tracks(tracks)
+            playlist.extend(tracks)
+            #playlist.add_tracks(tracks)
 
 
     @common.threaded
@@ -199,11 +200,11 @@ class DoubanRadioPlugin(object):
 
         rest_sids = self.get_rest_sids(playlist)
 
-        ## play next song
-        self.exaile.gui.main.queue.next()
-
         ## remove the track
         self.remove_current_track()
+        ## play next song
+        #self.exaile.gui.main.queue.next()
+        player.QUEUE.next()
 
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
@@ -273,7 +274,8 @@ class DoubanRadioPlugin(object):
             return None
 
     def remove_current_track(self):
-        self.exaile.gui.main.get_current_playlist().remove_selected_tracks()
+        pl = self.get_current_playlist()
+        del pl[pl.get_current_position()]
 
     def tracks_to_sids(self, tracks):
         return map(lambda t: t.get_tag_raw('sid')[0], tracks)
