@@ -243,7 +243,7 @@ class DoubanFMMode():
         self.track_title_label.set_label("%s - %s" %(title, artist))
         self.track_info_label.set_label(album)
 
-         if track.get_tag_raw('fav')[0] == "1":
+        if track.get_tag_raw('fav')[0] == "1":
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
         else:
