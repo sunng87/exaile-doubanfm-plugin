@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
+# Copyright (C) 2008-2012 Sun Ning <classicning@gmail.com>
+# Copyright (C) 2012 Yu Shijun <yushijun110@gmail.com>
+# Copyright (C) 2012 Liu Guyue <watermelonlh@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -241,7 +243,7 @@ class DoubanFMMode():
         self.track_title_label.set_label("%s - %s" %(title, artist))
         self.track_info_label.set_label(album)
 
-        if track.get_tag_raw('fav')[0] == "1":
+         if track.get_tag_raw('fav')[0] == "1":
             self.bookmark_button.set_image(
                     gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
         else:

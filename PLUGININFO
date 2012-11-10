@@ -1,5 +1,5 @@
-Version='0.0.12'
-Authors=['Sun Ning <sunng@about.me>']
+Version='0.0.13'
+Authors=['Sun Ning <sunng@about.me>', 'Yu shijun <yushijun110@gmail.com>', 'Liu Guyue <watermelonlh@gmail.com>']
 Name=_('Douban.fm')
-Description=_('This plugin brings you an all new expierence to enjoy the personalized playlist from douban.fm, without the ugly and nonfree flash player.')
+Description=_('This plugin brings you an all new expierence to enjoy the personalized music service from douban.fm, without the ugly and nonfree flash player.')
 Category=_('Media Sources')

@@ -1,4 +1,6 @@
-# Copyright (C) 2008-2011 Sun Ning <classicning@gmail.com>
+# Copyright (C) 2008-2012 Sun Ning <classicning@gmail.com>
+# Copyright (C) 2012 Yu Shijun <yushijun110@gmail.com>
+# Copyright (C) 2012 Liu Guyue <watermelonlh@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
