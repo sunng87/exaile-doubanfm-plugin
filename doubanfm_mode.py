@@ -250,10 +250,6 @@ class DoubanFMMode():
 
         self.sensitive(True)
 
-        ## recent change from official client, you can only trash
-        ## song in personal channel
-        self.trash_button.set_sensitive(self.dbfm_plugin.get_current_channel() == 0)
-
     def on_tag_update(self, e, track, tag):
         if track.get_tag_raw('fav')[0] == "1":
             self.bookmark_button.set_image(
