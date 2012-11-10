@@ -58,5 +58,11 @@ If you use `dbus-send`, you can refer this:
     --print-reply /info/sunng/ExaileDoubanfm \
     info.sunng.ExaileDoubanfm.Favorite
 
+Credits
+-------
+
+* [@sunng87](http://github.com/sunng87)
+* [@JoveYu](http://github.com/JoveYu)
+* [@watermelonlh](http://github.com/watermelonlh)
 
 
