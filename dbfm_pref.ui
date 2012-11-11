@@ -84,8 +84,7 @@ Thanks for using douban.fm plugin on exaile. To get your personalized playlist, 
               <object class="GtkLabel" id="label4">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">You have to restart exaile to enable the settings.
-</property>
+                <property name="label" translatable="yes"></property>
               </object>
               <packing>
                 <property name="right_attach">2</property>
