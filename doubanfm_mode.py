@@ -215,12 +215,8 @@ class DoubanFMMode():
 
         if track.get_tag_raw("fav")[0] == "1":
             self.dbfm_plugin.mark_as_dislike(track)
-            self.bookmark_button.set_image(
-                    gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
         else :
             self.dbfm_plugin.mark_as_like(track)
-            self.bookmark_button.set_image(
-                    gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
 
     def on_skip_button_clicked(self, *e):
         track = self.dbfm_plugin.get_current_track()
