@@ -127,7 +127,7 @@ class DoubanFMMode():
 
         event.add_callback(self.on_playback_start, 'playback_track_start', player.PLAYER)
         event.add_callback(self.on_playback_stop, 'playback_track_end', player.PLAYER)
-        event.add_callback(self.on_tag_update, 'track_tags_changed')
+        #event.add_callback(self.on_tag_update, 'track_tags_changed')
         self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
 
         ## added for 0.3.2
@@ -252,13 +252,13 @@ class DoubanFMMode():
 
         self.sensitive(True)
 
-    def on_tag_update(self, e, track, tag):
-        if track.get_tag_raw('fav')[0] == "1":
-            self.bookmark_button.set_image(
-                    gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
-        else:
-            self.bookmark_button.set_image(
-                    gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
+#    def on_tag_update(self, e, track, tag):
+#        if track.get_tag_raw('fav')[0] == "1":
+#            self.bookmark_button.set_image(
+#                    gtk.image_new_from_icon_name('emblem-favorite', gtk.ICON_SIZE_BUTTON))
+#        else:
+#            self.bookmark_button.set_image(
+#                    gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
 
     def on_playback_stop(self, type, player, data):
         self.sensitive(False)
