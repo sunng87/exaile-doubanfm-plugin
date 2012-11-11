@@ -166,8 +166,6 @@ class DoubanRadioPlugin(object):
         self.load_more_tracks(songs)
 
     def load_more_tracks(self, songs):
-        tracks = map(self.create_track_from_douban_song, songs)
-        playlist = self.get_current_playlist()
 
         #if self.get_tracks_remain() > 5:
         #    start = self.get_current_pos()+4
@@ -176,8 +174,9 @@ class DoubanRadioPlugin(object):
 
 
         if self.get_tracks_remain() < 5:
+            tracks = map(self.create_track_from_douban_song, songs)
+            playlist = self.get_current_playlist()
             playlist.extend(tracks)
-            #playlist.add_tracks(tracks)
 
 
     @common.threaded
