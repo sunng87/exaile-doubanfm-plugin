@@ -162,14 +162,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="pause_button">
+                  <object class="GtkButton" id="pause_button">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
                     <accelerator key="p" signal="clicked"/>
-                    <signal name="toggled" handler="on_pausebutton_toggled" swapped="no"/>
+                    <signal name="clicked" handler="on_pausebutton_clicked" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="image12">
                         <property name="visible">True</property>

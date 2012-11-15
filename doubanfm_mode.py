@@ -66,7 +66,7 @@ class DoubanFMMode():
             'on_item_report_clicked': self.on_button_report_clicked,
             'on_menu_toggle': self.on_menu_toggle,
             'on_quit': self.on_quit,
-            'on_pausebutton_toggled': self.on_pausebutton_toggled,
+            'on_pausebutton_clicked': self.on_pausebutton_clicked,
             'on_recommend_song': self.on_recommend_song,
             'on_share_sina': self.on_share_sina,
             'on_share_renren': self.on_share_renren,
@@ -127,6 +127,7 @@ class DoubanFMMode():
 
         event.add_callback(self.on_playback_start, 'playback_track_start', player.PLAYER)
         event.add_callback(self.on_playback_stop, 'playback_track_end', player.PLAYER)
+        event.add_callback(self.on_pausebutton_toggled, 'playback_toggle_pause', player.PLAYER)
         event.add_callback(self.on_tag_update, 'track_tags_changed')
         self._toggle_id = self.exaile.gui.main.connect('main-visible-toggle', self.toggle_visible)
 
@@ -247,6 +248,8 @@ class DoubanFMMode():
                     gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
 
         self.sensitive(True)
+        self.pause_button.set_image(
+                gtk.image_new_from_stock('gtk-media-pause', gtk.ICON_SIZE_BUTTON))
 
     def on_tag_update(self, e, track, tag):
         if track != self.dbfm_plugin.get_current_track():
@@ -260,6 +263,8 @@ class DoubanFMMode():
                     gtk.image_new_from_icon_name('bookmark-new', gtk.ICON_SIZE_BUTTON))
 
     def on_playback_stop(self, type, player, data):
+        self.pause_button.set_image(
+                gtk.image_new_from_stock('gtk-media-play', gtk.ICON_SIZE_BUTTON))
         self.sensitive(False)
 
     def sensitive(self, enable):
@@ -336,16 +341,22 @@ class DoubanFMMode():
 
         self.show()
 
-    def on_pausebutton_toggled(self, btn):
-        player.PLAYER.toggle_pause()
-        if btn.get_active():
+    def on_pausebutton_clicked(self, *e):
+        if player.PLAYER.is_paused() or player.PLAYER.is_playing():
+            player.PLAYER.toggle_pause()
+
+    def on_pausebutton_toggled(self, type, player, data):
+        if player.is_paused():
             ## switch to play icon
             self.pause_button.set_image(
                     gtk.image_new_from_stock('gtk-media-play', gtk.ICON_SIZE_BUTTON))
+            self.sensitive(False)
+            self.pause_button.set_sensitive(True)
         else:
             ## switch back
             self.pause_button.set_image(
                     gtk.image_new_from_stock('gtk-media-pause', gtk.ICON_SIZE_BUTTON))
+            self.sensitive(True)
 
     def on_copy_permalink(self, *e):
         track = self.dbfm_plugin.get_current_track()
