@@ -81,8 +81,13 @@ class DoubanFM(object):
         data = f.read()
         f.close()
         channels = json.loads(data)
+        self.channels = {}
         #red channel
-        self.channels = {u'Red Heart':-3}
+        self.channels['Red Heart'] = -3
+        #Personal Radio High
+        self.channels['Personal Radio High'] = -4
+        #Personal Radio Easy
+        self.channels['Personal Radio Easy'] = -5
         for channel in channels['channels']:
             self.channels[channel['name_en']] = channel['channel_id']
 
