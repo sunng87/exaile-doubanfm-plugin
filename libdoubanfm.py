@@ -35,7 +35,7 @@ import re
 import random
 import contextlib
 from Cookie import SimpleCookie
-
+from xl import player
 __all__ = ['DoubanFM', 'DoubanLoginException', 'DoubanFMChannels']
 
 class DoubanTrack(object):
@@ -85,9 +85,9 @@ class DoubanFM(object):
         #red channel
         self.channels['Red Heart'] = -3
         #Personal Radio High
-        self.channels['Personal Radio High'] = -4
+        #self.channels['Personal Radio High'] = -4
         #Personal Radio Easy
-        self.channels['Personal Radio Easy'] = -5
+        #self.channels['Personal Radio Easy'] = -5
         for channel in channels['channels']:
             self.channels[channel['name_en']] = channel['channel_id']
 
@@ -160,7 +160,7 @@ class DoubanFM(object):
         if not cookie.has_key('bid'):
             raise DoubanLoginException()
         else:
-            self.bid = cookie['bid']
+            self.bid = cookie['bid'].value
 
             return self.bid
 
@@ -187,10 +187,12 @@ class DoubanFM(object):
         params['r'] = random.random()
         params['uid'] = self.uid
         params['channel'] = self.channel
-
+        params['pb'] = 64
+        params['pt'] = player.PLAYER.get_time() 
+        params['from'] = 'mainsite'
+        
         if typename is not None:
             params['type'] = typename
-
         return params
 
     def __remote_fm(self, params, start=None):
@@ -206,11 +208,9 @@ class DoubanFM(object):
         with contextlib.closing(httplib.HTTPConnection("douban.fm")) as conn:
             conn.request('GET', "/j/mine/playlist?"+data, None, header)
             result = conn.getresponse().read()
-
             return result
 
 ### playlist related
-
     def json_to_douban_tracks(self, item):
         return DoubanTrack(**item)
 

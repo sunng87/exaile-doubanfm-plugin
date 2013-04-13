@@ -158,11 +158,11 @@ class DoubanRadioPlugin(object):
 
         ## play next song
         #self.exaile.gui.main.QUEUE.next()
-        player.QUEUE.next()
 
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
         songs = self.doubanfm.skip_song(sid, aid, history=self.get_history_sids(playlist))
+        player.QUEUE.next()
         self.load_more_tracks(songs)
 
     def load_more_tracks(self, songs):
@@ -183,6 +183,7 @@ class DoubanRadioPlugin(object):
     def mark_as_like(self, track):
         sid = track.get_tag_raw('sid')[0]
         aid = track.get_tag_raw('aid')[0]
+        pt = player.PLAYER.get_time()
         self.doubanfm.fav_song(sid, aid)
         track.set_tag_raw('fav', '1')
 
